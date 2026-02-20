@@ -994,6 +994,16 @@ function dbClear(){if(!confirm('전체 삭제하시겠습니까?'))return;dbSave
 
 // Init
 dbRender();
+
+// ★ 페이지 로드 시 오늘 날짜로 자동 세팅 + 자동 계산
+(function autoToday(){
+  const now=new Date();
+  document.getElementById('year').value=now.getFullYear();
+  document.getElementById('month').value=now.getMonth()+1;
+  document.getElementById('day').value=now.getDate();
+  document.getElementById('hour').value=now.getHours();
+  calc();
+})();
 </script>
 </body>
 </html>
