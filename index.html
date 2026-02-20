@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>별땅역학연구소 — 사주 만세력 Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700;900&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0b10;--card:#12131a;--card2:#181920;--gold:#c9a84c;--gold-l:#e8d48b;--gold-d:#8a7235;--tp:#e8e6e1;--ts:#9a9890;--td:#5a5850;--wood:#4a9e6e;--fire:#d64545;--earth:#c49a3c;--metal:#b8b8c8;--water:#3a7bd5;--bdr:rgba(201,168,76,.15);--r:10px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--tp);font-family:'Noto Sans KR',sans-serif;min-height:100vh;font-size:14px}
+.wrap{max-width:1100px;margin:0 auto;padding:24px 16px}
+header{text-align:center;margin-bottom:32px}
+header .brand{font-family:'Noto Serif KR',serif;font-size:12px;letter-spacing:6px;color:var(--gold-d)}
+header h1{font-family:'Noto Serif KR',serif;font-size:30px;font-weight:900;color:var(--gold);text-shadow:0 0 30px rgba(201,168,76,.15)}
+header .sub{font-size:13px;color:var(--ts);font-weight:300}
+
+/* Input */
+.inp-box{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:24px;margin-bottom:24px}
+.inp-box h2{font-family:'Noto Serif KR',serif;font-size:16px;color:var(--gold-l);margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--bdr)}
+.inp-row{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-bottom:10px}
+.inp-row .fg{display:flex;flex-direction:column;gap:4px}
+.inp-row .fg label{font-size:11px;color:var(--ts);letter-spacing:1px}
+.inp-row .fg input,.inp-row .fg select{background:var(--bg);border:1px solid var(--bdr);border-radius:6px;color:var(--tp);font-family:inherit;font-size:14px;padding:7px 10px;outline:none;min-width:80px}
+.inp-row .fg select option{background:var(--card)}
+.inp-row .fg input:focus,.inp-row .fg select:focus{border-color:var(--gold)}
+.cal-tog{display:flex;gap:0;border-radius:6px;overflow:hidden;border:1px solid var(--bdr)}
+.cal-tog button{background:var(--bg);border:none;color:var(--ts);padding:7px 16px;font-size:13px;font-family:inherit;cursor:pointer}
+.cal-tog button.act{background:rgba(201,168,76,.12);color:var(--gold)}
+.cal-tog button+button{border-left:1px solid var(--bdr)}
+.g-btn{background:var(--bg);border:1px solid var(--bdr);color:var(--ts);padding:6px 16px;border-radius:6px;cursor:pointer;font-size:13px;font-family:inherit}
+.g-btn.act{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.08)}
+.leap-chk{font-size:12px;color:var(--ts);display:none;align-items:center;gap:5px}
+.leap-chk.show{display:flex}
+.leap-chk input{accent-color:var(--gold)}
+.note{font-size:10px;color:var(--td);margin-bottom:10px;line-height:1.6}
+.note em{color:var(--gold-d);font-style:normal}
+.btn-calc{background:linear-gradient(135deg,var(--gold-d),var(--gold));color:var(--bg);border:none;border-radius:8px;padding:10px 32px;font-family:'Noto Serif KR',serif;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:2px}
+.btn-calc:hover{box-shadow:0 4px 16px rgba(201,168,76,.25)}
+.btn-calc:disabled{opacity:.5;cursor:not-allowed}
+
+/* Result */
+#result{display:none}
+#result.show{display:block;animation:fu .5s ease}
+@keyframes fu{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
+.res-head{text-align:center;margin-bottom:20px}
+.res-head .tit{font-family:'Noto Serif KR',serif;font-size:14px;color:var(--ts)}
+.res-head .dt{font-size:12px;color:var(--td)}
+.conv-note{text-align:center;font-size:11px;color:var(--gold-d);padding:6px;background:rgba(201,168,76,.05);border-radius:6px;margin-bottom:10px}
+
+/* Saju Table */
+.saju-tbl{width:100%;border-collapse:collapse;margin-bottom:24px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden}
+.saju-tbl th,.saju-tbl td{padding:5px 4px;text-align:center;border-bottom:1px solid var(--bdr);font-size:12px}
+.saju-tbl th{color:var(--td);font-weight:400;font-size:10px;letter-spacing:2px;background:rgba(255,255,255,.02)}
+.saju-tbl .lbl{color:var(--gold-d);font-size:10px;text-align:right;padding-right:8px;white-space:nowrap;width:56px}
+.saju-tbl .hanja{font-family:'Noto Serif KR',serif;font-size:28px;font-weight:900;padding:8px 4px}
+.saju-tbl .ss{font-size:11px;color:var(--ts)}
+.saju-tbl .ilgan{color:var(--gold-l);font-weight:600}
+.saju-tbl .jj-row td{font-size:11px;padding:3px 4px}
+.saju-tbl .sep td{padding:0;height:2px;background:var(--bdr)}
+.saju-tbl .sinsal-cell{font-size:9px;color:var(--ts);line-height:1.5}
+.saju-tbl .sinsal-cell span{display:inline-block;background:rgba(201,168,76,.08);border:1px solid var(--bdr);border-radius:3px;padding:1px 4px;margin:1px;white-space:nowrap}
+
+.c-wood{color:var(--wood)}.c-fire{color:var(--fire)}.c-earth{color:var(--earth)}.c-metal{color:var(--metal)}.c-water{color:var(--water)}
+
+/* 대운/세운 */
+.section{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:16px;margin-bottom:16px}
+.section h3{font-family:'Noto Serif KR',serif;font-size:14px;color:var(--gold-l);margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--bdr)}
+.un-scroll{overflow-x:auto;padding-bottom:8px}
+.un-row{display:flex;gap:6px;min-width:max-content}
+.un-card{min-width:72px;background:var(--card2);border:1px solid var(--bdr);border-radius:8px;padding:8px 6px;text-align:center;flex-shrink:0;cursor:pointer;transition:all .2s;position:relative}
+.un-card:hover{border-color:var(--gold);transform:translateY(-2px)}
+.un-card.current{border-color:var(--gold);box-shadow:0 0 8px rgba(201,168,76,.15)}
+.un-card.selected{border-color:var(--gold-l);background:rgba(201,168,76,.08);box-shadow:0 0 12px rgba(201,168,76,.2)}
+.un-card.selected::after{content:'▼';position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);font-size:8px;color:var(--gold)}
+.un-age{font-size:10px;color:var(--td);margin-bottom:4px}
+.un-year{font-size:9px;color:var(--td)}
+.un-hanja{font-family:'Noto Serif KR',serif;font-size:22px;font-weight:700;margin:4px 0}
+.un-ss{font-size:10px;color:var(--ts)}
+.un-sinsal{font-size:8px;color:var(--td);margin-top:2px}
+/* 세운 펼침 패널 */
+.seun-panel{margin-top:14px;padding:14px;background:rgba(201,168,76,.03);border:1px solid var(--bdr);border-radius:8px;display:none}
+.seun-panel.open{display:block}
+.seun-panel-title{font-size:12px;color:var(--gold);margin-bottom:10px;font-weight:600}
+.seun-panel-title .du-info{font-size:11px;color:var(--ts);font-weight:400;margin-left:8px}
+.seun-row{display:flex;gap:5px;overflow-x:auto;padding-bottom:6px}
+.seun-card{min-width:66px;background:var(--card2);border:1px solid var(--bdr);border-radius:6px;padding:6px 5px;text-align:center;flex-shrink:0}
+.seun-card.now{border-color:var(--gold);box-shadow:0 0 6px rgba(201,168,76,.12)}
+.seun-hanja{font-family:'Noto Serif KR',serif;font-size:18px;font-weight:700;margin:3px 0}
+.seun-age{font-size:9px;color:var(--td)}
+.seun-ss{font-size:9px;color:var(--ts)}
+.seun-sinsal{font-size:8px;color:var(--td);margin-top:1px}
+.seun-rel{font-size:8px;margin-top:3px;line-height:1.4}
+.seun-rel span{display:inline-block;padding:1px 3px;border-radius:2px;margin:1px}
+.rel-chung{background:rgba(239,83,80,.12);color:#ef5350}
+.rel-hab{background:rgba(102,187,106,.12);color:#66bb6a}
+.rel-hyung{background:rgba(255,167,38,.12);color:#ffa726}
+.rel-etc{background:rgba(255,255,255,.06);color:var(--td)}
+
+/* 오행/공망 */
+.info-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+@media(max-width:600px){.info-row{grid-template-columns:1fr}.saju-tbl .hanja{font-size:22px}}
+.elem-bar{display:flex;height:24px;border-radius:6px;overflow:hidden;margin-bottom:8px}
+.elem-bar div{display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;min-width:0}
+.b-wood{background:rgba(74,158,110,.5);color:#fff}.b-fire{background:rgba(214,69,69,.5);color:#fff}
+.b-earth{background:rgba(196,154,60,.5);color:#fff}.b-metal{background:rgba(184,184,200,.3);color:#fff}
+.b-water{background:rgba(58,123,213,.5);color:#fff}
+.elem-leg{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;font-size:11px;color:var(--ts)}
+.elem-leg .dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:3px;vertical-align:middle}
+.gm-chars{font-family:'Noto Serif KR',serif;font-size:24px;color:var(--gold);letter-spacing:8px;text-align:center;margin:8px 0}
+.gm-desc{font-size:12px;color:var(--ts);text-align:center;line-height:1.6}
+
+/* 합충형파해 */
+.rel-grid{display:flex;flex-wrap:wrap;gap:6px}
+.rel-tag{font-size:12px;padding:4px 10px;border-radius:5px;border:1px solid var(--bdr);display:inline-flex;align-items:center;gap:4px}
+.rel-tag .pair{font-family:'Noto Serif KR',serif;font-weight:700;font-size:13px}
+.rel-tag .lbl{font-size:10px;color:var(--td);margin-left:2px}
+.rel-hap{border-color:rgba(74,158,110,.4);color:var(--wood);background:rgba(74,158,110,.06)}
+.rel-samhap{border-color:rgba(58,123,213,.4);color:var(--water);background:rgba(58,123,213,.06)}
+.rel-banghap{border-color:rgba(100,180,220,.4);color:#7cc;background:rgba(100,180,220,.06)}
+.rel-chung{border-color:rgba(214,69,69,.4);color:var(--fire);background:rgba(214,69,69,.06)}
+.rel-hyung{border-color:rgba(200,100,50,.4);color:#d87;background:rgba(200,100,50,.06)}
+.rel-pa{border-color:rgba(180,140,60,.4);color:#ca6;background:rgba(180,140,60,.06)}
+.rel-hae{border-color:rgba(160,80,160,.4);color:#b8b;background:rgba(160,80,160,.06)}
+.rel-wonjin{border-color:rgba(200,60,100,.4);color:#e77;background:rgba(200,60,100,.06)}
+.rel-gyeokgak{border-color:rgba(120,120,180,.4);color:#99b;background:rgba(120,120,180,.06)}
+.rel-ganhap{border-color:rgba(74,158,110,.4);color:var(--wood);background:rgba(74,158,110,.06)}
+.rel-none{color:var(--td);font-size:12px;padding:8px 0}
+
+/* 신살 종합 */
+.sinsal-summary{display:flex;flex-wrap:wrap;gap:6px;padding:8px 0}
+.sinsal-summary .tag{font-size:11px;padding:3px 10px;border-radius:4px;border:1px solid var(--bdr);color:var(--ts);background:rgba(255,255,255,.02)}
+.sinsal-summary .tag.gil{border-color:rgba(74,158,110,.3);color:var(--wood)}
+.sinsal-summary .tag.teuk{border-color:rgba(201,168,76,.3);color:var(--gold-l)}
+.sinsal-summary .tag.hyung{border-color:rgba(214,69,69,.3);color:var(--fire)}
+
+/* DB */
+.db-box{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:16px;margin-bottom:16px}
+.db-box h3{font-family:'Noto Serif KR',serif;font-size:14px;color:var(--gold-l);margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--bdr)}
+.db-actions{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.db-btn{background:var(--bg);border:1px solid var(--bdr);color:var(--ts);padding:5px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-family:inherit}
+.db-btn:hover{border-color:var(--gold);color:var(--gold)}
+.db-btn.primary{background:rgba(201,168,76,.1);border-color:var(--gold-d);color:var(--gold)}
+.db-input{background:var(--bg);border:1px solid var(--bdr);border-radius:6px;color:var(--tp);font-family:inherit;font-size:13px;padding:5px 10px;outline:none;flex:1;min-width:120px}
+.db-input:focus{border-color:var(--gold)}
+.db-list{max-height:200px;overflow-y:auto}
+.db-item{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;border-bottom:1px solid rgba(255,255,255,.03);cursor:pointer;font-size:12px;transition:background .2s}
+.db-item:hover{background:rgba(201,168,76,.05)}
+.db-item .name{color:var(--tp);font-weight:500}
+.db-item .info{color:var(--td);font-size:11px}
+.db-item .del{color:var(--fire);cursor:pointer;padding:2px 6px;opacity:.5}
+.db-item .del:hover{opacity:1}
+
+footer{text-align:center;margin-top:32px;padding-top:16px;border-top:1px solid var(--bdr)}
+footer p{font-size:10px;color:var(--td);line-height:1.8}
+footer .fb{font-family:'Noto Serif KR',serif;color:var(--gold-d);font-size:11px}
+
+/* 빠른 입력 */
+.quick-paste{display:flex;gap:6px;margin-bottom:12px}
+.quick-input{flex:1;background:var(--bg);border:1px solid var(--bdr);border-radius:8px;color:var(--tp);font-family:inherit;font-size:13px;padding:10px 14px;outline:none;transition:border-color .2s}
+.quick-input:focus{border-color:var(--gold)}
+.quick-input::placeholder{color:var(--td);font-size:12px}
+.quick-btn{background:rgba(201,168,76,.12);border:1px solid var(--gold-d);color:var(--gold);padding:10px 20px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;white-space:nowrap;transition:all .2s}
+.quick-btn:hover{background:rgba(201,168,76,.2);border-color:var(--gold)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<div class="brand">별 땅 역 학 연 구 소</div>
+<h1>四柱 萬歲曆 Pro</h1>
+<p class="sub">대운 · 세운 · 신살 · 인물DB</p>
+</header>
+
+<div class="inp-box">
+<h2>生年月日時 입력</h2>
+<div class="quick-paste">
+  <input type="text" id="quickInput" class="quick-input" placeholder="예: 1879년 3월 14일 오전 11:30 남 아인슈타인" 
+    onkeydown="if(event.key==='Enter')parseQuick()">
+  <button class="quick-btn" onclick="parseQuick()">입력</button>
+</div>
+<div class="inp-row">
+  <div class="cal-tog">
+    <button class="act" onclick="setCal('solar',this)">양력</button>
+    <button onclick="setCal('lunar',this)">음력</button>
+  </div>
+  <div class="fg"><label>연</label><input type="number" id="year" min="1300" max="2100" value="1990"></div>
+  <div class="fg"><label>월</label><select id="month"><option value="1">1월</option><option value="2">2월</option><option value="3">3월</option><option value="4">4월</option><option value="5">5월</option><option value="6" selected>6월</option><option value="7">7월</option><option value="8">8월</option><option value="9">9월</option><option value="10">10월</option><option value="11">11월</option><option value="12">12월</option></select></div>
+  <div class="fg"><label>일</label><input type="number" id="day" min="1" max="31" value="15"></div>
+  <div class="fg"><label>시</label><select id="hour"><option value="-1">모름</option><option value="0">0시</option><option value="1">1시</option><option value="2">2시</option><option value="3">3시</option><option value="4">4시</option><option value="5">5시</option><option value="6">6시</option><option value="7">7시</option><option value="8">8시</option><option value="9">9시</option><option value="10">10시</option><option value="11">11시</option><option value="12" selected>12시</option><option value="13">13시</option><option value="14">14시</option><option value="15">15시</option><option value="16">16시</option><option value="17">17시</option><option value="18">18시</option><option value="19">19시</option><option value="20">20시</option><option value="21">21시</option><option value="22">22시</option><option value="23">23시</option></select></div>
+  <div class="fg"><label>성별</label><div style="display:flex;gap:4px"><button class="g-btn act" onclick="setG('male',this)">남♂</button><button class="g-btn" onclick="setG('female',this)">여♀</button></div></div>
+  <div class="fg"><label>이름</label><input type="text" id="pname" placeholder="(선택)" style="min-width:100px"></div>
+</div>
+<div class="inp-row">
+  <label class="leap-chk" id="leapRow"><input type="checkbox" id="leapMonth">윤달</label>
+</div>
+<div class="note">※ 별땅연구소 <em>30분 보정 시간대</em> 적용 · 시간 모르면 '모름' 선택 (시주 생략)</div>
+<div class="inp-row"><button class="btn-calc" id="calcBtn" onclick="calc()">사주 확인하기</button></div>
+</div>
+
+<div id="result">
+<div id="convNote" class="conv-note" style="display:none"></div>
+<div class="res-head"><div class="tit" id="resTit"></div><div class="dt" id="resDt"></div></div>
+
+<table class="saju-tbl" id="sajuTbl"></table>
+
+<div class="section" id="sinSec"><h3>神殺 종합</h3><div class="sinsal-summary" id="sinList"></div></div>
+
+<div class="section"><h3>大運 · 歲運 <span style="font-size:10px;color:var(--td);font-weight:400">— 대운을 클릭하면 세운이 펼쳐집니다</span></h3><div class="un-scroll"><div class="un-row" id="daeunRow"></div></div><div class="seun-panel" id="seunPanel"><div class="seun-panel-title" id="seunTitle"></div><div class="seun-row" id="seunRow"></div></div></div>
+
+<div class="info-row" style="display:block">
+<div class="section" style="width:100%"><h3>合沖刑破害 · 원진 · 격각</h3><div id="relBox"></div></div>
+</div>
+</div>
+
+<div class="db-box">
+<h3>人物 DB</h3>
+<div class="db-actions">
+  <button class="db-btn primary" onclick="dbSave()">현재 사주 저장</button>
+  <input class="db-input" id="dbSearch" placeholder="이름/키워드 검색" oninput="dbRender()">
+  <button class="db-btn" onclick="dbClear()">전체 삭제</button>
+</div>
+<div class="db-list" id="dbList"></div>
+</div>
+
+<footer><p class="fb">별땅역학연구소</p><p>본 만세력은 참고용입니다. 절기 경계일은 만세력과 교차 확인하세요.</p></footer>
+</div>
+
+<script>
+// === Constants ===
+const SH='甲乙丙丁戊己庚辛壬癸'.split(''),Sh='갑을병정무기경신임계'.split('');
+const BH='子丑寅卯辰巳午未申酉戌亥'.split(''),Bh='자축인묘진사오미신유술해'.split('');
+const BA=['쥐','소','호랑이','토끼','용','뱀','말','양','원숭이','닭','개','돼지'];
+const SE=[0,0,1,1,2,2,3,3,4,4],BE=[4,2,0,0,2,1,1,2,3,3,2,4];
+const EN=['木','火','土','金','水'],Ek=['목','화','토','금','수'],EC=['wood','fire','earth','metal','water'];
+const YY=['양','음','양','음','양','음','양','음','양','음'];
+const BY=['양','음','양','음','양','음','양','음','양','음','양','음'];
+const TCN=['장생','목욕','관대','건록','제왕','쇠','병','사','묘','절','태','양'];
+const TCB=[11,6,2,9,2,9,5,0,8,3];
+const SSN=['비견','겁재','식신','상관','편재','정재','편관','정관','편인','정인'];
+
+// 지장간 [본기, 중기, 여기] — null = 해당 없음
+const JJ=[
+  [9, null, 8],   // 子: 癸(본), 壬(여)
+  [5,  7, 9],     // 丑: 己(본), 辛(중), 癸(여)
+  [0,  2, 4],     // 寅: 甲(본), 丙(중), 戊(여)
+  [1, null, 0],   // 卯: 乙(본), 甲(여)
+  [4,  9, 1],     // 辰: 戊(본), 癸(중), 乙(여)
+  [2,  6, 4],     // 巳: 丙(본), 庚(중), 戊(여)
+  [3,  5, 2],     // 午: 丁(본), 己(중), 丙(여)
+  [5,  1, 3],     // 未: 己(본), 乙(중), 丁(여)
+  [6,  8, 4],     // 申: 庚(본), 壬(중), 戊(여)
+  [7, null, 6],   // 酉: 辛(본), 庚(여)
+  [4,  3, 7],     // 戌: 戊(본), 丁(중), 辛(여)
+  [8,  0, 4],     // 亥: 壬(본), 甲(중), 戊(여)
+];
+const JJ_LABEL=['본기','중기','여기'];
+
+// === 신살 Tables ===
+// 천을귀인 (일간→지지)
+const CHEONUL=[[1,7],[0,8],[11,9],[11,9],[1,7],[0,8],[1,7],[2,6],[3,5],[3,5]];
+// 문창귀인
+const MUNCHANG=[5,6,8,8,9,9,11,0,2,3];
+// 학당귀인
+const HAKDANG=[11,6,2,9,8,9,5,0,8,3];
+// 양인살
+const YANGIN=[3,2,6,5,6,5,9,8,0,11];
+
+// 삼합 group: branch→groupIdx (寅午戌=0, 申子辰=1, 巳酉丑=2, 亥卯未=3)
+function samG(b){const g=[[2,6,10],[8,0,4],[5,9,1],[11,3,7]];for(let i=0;i<4;i++)if(g[i].includes(b))return i;return 0;}
+// 역마살
+const YEOKMA=[8,2,11,5];
+// 도화살
+const DOHWA=[3,9,6,0];
+// 화개살
+const HWAGAE=[10,4,1,7];
+// 겁살
+const GEOBSAL=[5,11,2,8];
+// 재살
+const JAESAL=[6,0,3,9];
+// 장성살
+const JANGSEONG=[2,8,5,11];
+// 망신살
+const MANGSIN=[7,1,4,10];
+// 반안살
+const BANAN=[9,3,0,6];
+
+// 괴강살 일주
+const GOEGANG=new Set([getSI(6,4),getSI(6,10),getSI(8,4),getSI(4,10)]);
+// 나체도화 일주
+const NACHAE=new Set([getSI(0,0),getSI(5,3),getSI(6,6),getSI(9,9),getSI(3,3)]);
+// 금신 일주
+const GEUMSHIN=new Set([getSI(1,1),getSI(5,5),getSI(9,9)]);
+
+function getSI(s,b){return((6*s-5*b)%60+60)%60;}
+
+// === Astronomy ===
+function getJDN(y,m,d){let Y=y,M=m;if(M<=2){Y--;M+=12}const A=Math.floor(Y/100),B=2-A+Math.floor(A/4);return Math.floor(365.25*(Y+4716))+Math.floor(30.6001*(M+1))+d+B-1524;}
+function jdn2d(j){const a=Math.floor((j-1867216.25)/36524.25),A=j+1+a-Math.floor(a/4),B=A+1524,C=Math.floor((B-122.1)/365.25),D=Math.floor(365.25*C),E=Math.floor((B-D)/30.6001);return{d:B-D-Math.floor(30.6001*E),m:E<14?E-1:E-13,y:(E<14?E-1:E-13)>2?C-4716:C-4715};}
+
+function sunLon(jd){const T=(jd-2451545)/36525;let L=280.46646+36000.76983*T+.0003032*T*T;L=((L%360)+360)%360;let M=357.52911+35999.05029*T-.0001537*T*T;M=((M%360)+360)%360;const Mr=M*Math.PI/180;const C=(1.914602-.004817*T-.000014*T*T)*Math.sin(Mr)+(.019993-.000101*T)*Math.sin(2*Mr)+.000289*Math.sin(3*Mr);let s=L+C;const o=125.04-1934.136*T;s=s-.00569-.00478*Math.sin(o*Math.PI/180);return((s%360)+360)%360;}
+
+function findST(yr,lon){let e=getJDN(yr,3,20)+.5+lon/.9856;for(let i=0;i<50;i++){const c=sunLon(e);let d=lon-c;if(d>180)d-=360;if(d<-180)d+=360;if(Math.abs(d)<.00001)break;e+=d/.9856;}return e;}
+
+const JL=[315,345,15,45,75,105,135,165,195,225,255,285];
+
+// === Lunar Calendar ===
+const KST=9/24;
+function jdLD(jd){return Math.floor(jd+KST+.5);}
+function nmJD(k){const T=k/1236.85,T2=T*T,T3=T2*T,T4=T3*T;let J=2451550.09766+29.530588861*k+.00015437*T2-.00000015*T3+.00000000073*T4;const E=1-.002516*T-.0000074*T2;const S=(2.5534+29.10535670*k-.0000014*T2-.00000011*T3)*Math.PI/180;const M=(201.5643+385.81693528*k+.0107582*T2+.00001238*T3-.000000058*T4)*Math.PI/180;const F=(160.7108+390.67050284*k-.0016118*T2-.00000227*T3+.000000011*T4)*Math.PI/180;const O=(124.7746-1.56375588*k+.0020672*T2+.00000215*T3)*Math.PI/180;
+J+=-.40720*Math.sin(M)+.17241*E*Math.sin(S)+.01608*Math.sin(2*M)+.01039*Math.sin(2*F)+.00739*E*Math.sin(M-S)-.00514*E*Math.sin(M+S)+.00208*E*E*Math.sin(2*S)-.00111*Math.sin(M-2*F)-.00057*Math.sin(M+2*F)+.00056*E*Math.sin(2*M+S)-.00042*Math.sin(3*M)+.00042*E*Math.sin(S+2*F)+.00038*E*Math.sin(S-2*F)-.00024*E*Math.sin(2*M-S)-.00017*Math.sin(O);return J;}
+
+function buildLC(ly){const w1=findST(ly-1,270),w2=findST(ly,270),w1d=jdLD(w1),w2d=jdLD(w2);let k0=Math.floor((w1-2451550.1)/29.530588861)-2,moons=[];for(let i=0;i<50;i++){const j=nmJD(k0+i);if(j>w2+40)break;if(j>=w1-40)moons.push(j);}const md=moons.map(j=>jdLD(j));let m1=-1,m2=-1;for(let i=md.length-1;i>=0;i--){if(md[i]<=w1d){m1=i;break;}}for(let i=md.length-1;i>=0;i--){if(md[i]<=w2d){m2=i;break;}}if(m1<0||m2<0||m2<=m1)return null;const nm=m2-m1,hasL=nm===13;let zq=[];for(let y=ly-2;y<=ly+1;y++)for(let q=0;q<12;q++)zq.push(jdLD(findST(y,q*30)));zq=[...new Set(zq)].sort((a,b)=>a-b);function hasZQ(s,e){for(const d of zq)if(d>=s&&d<=e)return true;return false;}
+let li=-1;if(hasL)for(let i=m1+1;i<m2;i++){if(!hasZQ(md[i],md[i+1]-1)){li=i-m1;break;}}
+let ms=[],mn=11;for(let i=0;i<=nm;i++){const idx=m1+i,il=hasL&&i===li,sd=md[idx],nd=idx+1<md.length?md[idx+1]-md[idx]:30;ms.push({mn,il,sd,nd});if(!il)mn=mn%12+1;}return ms;}
+
+function l2s(ly,lm,ld,il){const ms=buildLC(ly);if(!ms)return null;let t=null;for(const m of ms)if(m.mn===lm&&m.il===il){t=m;break;}if(!t||ld<1||ld>t.nd)return null;return jdn2d(t.sd+ld-1);}
+
+// === Saju Calculation ===
+function dayP(y,m,d){const j=getJDN(y,m,d),si=((j%60)+49)%60;return{s:si%10,b:si%12,si};}
+// ★ KST→UT 변환 정밀 JD (h=-1이면 정오 기준 fallback)
+function birthJD_UT(y,m,d,h){return h>=0?getJDN(y,m,d)+(h-12)/24-9/24+0.5/24:getJDN(y,m,d)+.5;}
+function yearP(y,m,d,h,ij){const c=birthJD_UT(y,m,d,h);let ey=y;if(c<ij)ey--;return{s:((ey-4)%10+10)%10,b:((ey-4)%12+12)%12};}
+
+function monthP(y,m,d,h,ys){
+  const c=birthJD_UT(y,m,d,h);let jds=[];
+  for(let yr=y-1;yr<=y+1;yr++)for(let i=0;i<12;i++){let cy=yr;if(JL[i]>=315)cy=yr-1;jds.push({jd:findST(cy,JL[i]),mi:i});}
+  jds.sort((a,b)=>a.jd-b.jd);
+  let cm=11;for(let i=jds.length-1;i>=0;i--)if(c>=jds[i].jd){cm=jds[i].mi;break;}
+  return{s:((ys%5)*2+2+cm)%10,b:(cm+2)%12};
+}
+
+function hourP(h,ds){
+  if(h<0)return null;
+  let t=h*60+30;if(t>=1440)t-=1440;
+  let bi;if(t<120)bi=0;else if(t<240)bi=1;else if(t<360)bi=2;else if(t<480)bi=3;else if(t<600)bi=4;else if(t<720)bi=5;else if(t<840)bi=6;else if(t<960)bi=7;else if(t<1080)bi=8;else if(t<1200)bi=9;else if(t<1320)bi=10;else bi=11;
+  let eds=ds;if(h>=23)eds=(ds+1)%10;
+  return{s:(eds*2+bi)%10,b:bi};
+}
+
+function tc(si,bi){const sb=TCB[si];return si%2===0?(bi-sb+12)%12:(sb-bi+12)%12;}
+function ss(ds,ts){const r=(SE[ts]-SE[ds]+5)%5;return SSN[r*2+((ds%2)===(ts%2)?0:1)];}
+function gm(si){const xs=Math.floor(si/10)*10,sb=xs%12;return[(sb+10)%12,(sb+11)%12];}
+function ecls(s){return'c-'+EC[SE[s]];}
+function eclsB(b){return'c-'+EC[BE[b]];}
+
+// === 대운 Calculation ===
+function calcDaeun(sY,sM,sD,h,gender,yearStem,monthSI){
+  const isYang=yearStem%2===0;
+  const fwd=(gender==='male'&&isYang)||(gender==='female'&&!isYang);
+  
+  // Find jeolgi bracketing birth — ★ 정밀 시각 비교
+  const bJD=birthJD_UT(sY,sM,sD,h);
+  let jgs=[];
+  for(let yr=sY-1;yr<=sY+1;yr++)for(let i=0;i<12;i++){let cy=yr;if(JL[i]>=315)cy=yr-1;jgs.push(findST(cy,JL[i]));}
+  jgs.sort((a,b)=>a-b);
+  
+  let days;
+  if(fwd){for(const j of jgs)if(j>bJD){days=j-bJD;break;}}
+  else{for(let i=jgs.length-1;i>=0;i--)if(jgs[i]<bJD){days=bJD-jgs[i];break;}}
+  
+  const daeunsu=Math.round((days||0)/3);
+  
+  // Generate 대운 pillars
+  let result=[];
+  for(let i=1;i<=10;i++){
+    const offset=fwd?i:-i;
+    const newSI=((monthSI+offset)%60+60)%60;
+    result.push({s:newSI%10,b:newSI%12,age:daeunsu+(i-1)*10,si:newSI});
+  }
+  return{daeunsu,fwd,pillars:result};
+}
+
+// === 연지 기준 12신살 ===
+const SINSAL12_NAMES=['겁살','재살','천살','지살','연살','월살','망신살','장성살','반안살','역마살','도화살','화개살'];
+// 삼합 그룹별 겁살 시작 지지: 寅午戌→巳, 申子辰→亥, 巳酉丑→寅, 亥卯未→申
+const SINSAL12_START=[5,11,2,8]; // group 0~3
+
+function samGYear(b){
+  const g=[[2,6,10],[8,0,4],[5,9,1],[11,3,7]];
+  for(let i=0;i<4;i++)if(g[i].includes(b))return i;
+  return 0;
+}
+
+function get12Sinsal(yearBranch, targetBranch){
+  const grp=samGYear(yearBranch);
+  const start=SINSAL12_START[grp];
+  const idx=((targetBranch-start)%12+12)%12;
+  return SINSAL12_NAMES[idx];
+}
+
+
+// 육합 pairs
+const YUKHAP_PAIRS=[[0,1],[2,11],[3,10],[4,9],[5,8],[6,7]];
+const YUKHAP_NAME=['子丑','寅亥','卯戌','辰酉','巳申','午未'];
+function isYukhap(a,b){for(let i=0;i<6;i++){const p=YUKHAP_PAIRS[i];if((p[0]===a&&p[1]===b)||(p[0]===b&&p[1]===a))return YUKHAP_NAME[i];}return null;}
+
+// 삼합 groups
+const SAMHAP_GROUPS=[[2,6,10,'火'],[8,0,4,'水'],[5,9,1,'金'],[11,3,7,'木']];
+function isSamhap(a,b){for(const g of SAMHAP_GROUPS)if(g.includes(a)&&g.includes(b))return g[3]+'국';return null;}
+
+// 방합 groups
+const BANGHAP_GROUPS=[[2,3,4,'東方木'],[5,6,7,'南方火'],[8,9,10,'西方金'],[11,0,1,'北方水']];
+function isBanghap(a,b){for(const g of BANGHAP_GROUPS)if(g.includes(a)&&g.includes(b))return g[3];return null;}
+
+// 충 pairs (distance 6)
+function isChung2(a,b){return(a-b+12)%12===6?BH[a]+BH[b]:null;}
+
+// 형 (삼형살)
+const HYUNG_SETS=[
+  {set:[2,5,8],name:'무은지형(無恩之刑)'},  // 寅巳申
+  {set:[1,10,7],name:'무례지형(無禮之刑)'}, // 丑戌未
+];
+const HYUNG_PAIR=[[0,3,'무례지형(無禮之刑)']]; // 子卯
+const SELF_HYUNG=[4,6,9,11]; // 辰午酉亥 자형
+function isHyung(a,b){
+  for(const h of HYUNG_SETS)if(h.set.includes(a)&&h.set.includes(b)&&a!==b)return h.name;
+  for(const p of HYUNG_PAIR)if((p[0]===a&&p[1]===b)||(p[0]===b&&p[1]===a))return p[2];
+  if(a===b&&SELF_HYUNG.includes(a))return '자형(自刑)';
+  return null;
+}
+
+// 파 pairs
+const PA_PAIRS=[[0,9],[1,4],[2,11],[3,6],[5,8],[7,10]];
+function isPa(a,b){for(const p of PA_PAIRS)if((p[0]===a&&p[1]===b)||(p[0]===b&&p[1]===a))return BH[a]+BH[b];return null;}
+
+// 해 pairs (육해)
+const HAE_PAIRS=[[0,7],[1,6],[2,5],[3,4],[8,11],[9,10]];
+function isHae(a,b){for(const p of HAE_PAIRS)if((p[0]===a&&p[1]===b)||(p[0]===b&&p[1]===a))return BH[a]+BH[b];return null;}
+
+// 원진 pairs (distance 5)
+const WONJIN_PAIRS=[[0,7],[1,6],[2,9],[3,8],[4,11],[5,10]];
+function isWonjin(a,b){for(const p of WONJIN_PAIRS)if((p[0]===a&&p[1]===b)||(p[0]===b&&p[1]===a))return BH[a]+BH[b];return null;}
+
+// 격각 (distance 2)
+function isGyeokgak(a,b){const d=Math.min((a-b+12)%12,(b-a+12)%12);return d===2?BH[a]+BH[b]:null;}
+
+// 천간합
+const GANHAP_PAIRS=[[0,5,'土'],[1,6,'金'],[2,7,'水'],[3,8,'木'],[4,9,'火']];
+function isGanhap(a,b){for(const p of GANHAP_PAIRS)if((p[0]===a&&p[1]===b)||(p[0]===b&&p[1]===a))return SH[a]+SH[b]+'합→'+p[2];return null;}
+
+function calcRelations(pillars){
+  // pillars: [{name, s, b},...] in order [시,일,월,연]
+  const names=['시','일','월','연'];
+  let rels=[];
+  
+  for(let i=0;i<pillars.length;i++){
+    if(!pillars[i])continue;
+    for(let j=i+1;j<pillars.length;j++){
+      if(!pillars[j])continue;
+      const a=pillars[i],b=pillars[j];
+      const pair=names[i]+names[j];
+      
+      // 천간
+      const gh=isGanhap(a.s,b.s);
+      if(gh)rels.push({type:'ganhap',cls:'rel-ganhap',text:gh,pair,label:'천간합'});
+      
+      // 지지
+      const ba=a.b,bb=b.b;
+      
+      const yh=isYukhap(ba,bb);
+      if(yh)rels.push({type:'yukhap',cls:'rel-hap',text:BH[ba]+BH[bb],pair,label:'육합'});
+      
+      const sh=isSamhap(ba,bb);
+      if(sh)rels.push({type:'samhap',cls:'rel-samhap',text:BH[ba]+BH[bb],pair,label:'삼합('+sh+')'});
+      
+      const bh=isBanghap(ba,bb);
+      if(bh&&!yh&&!sh)rels.push({type:'banghap',cls:'rel-banghap',text:BH[ba]+BH[bb],pair,label:'방합('+bh+')'});
+      
+      const ch=isChung2(ba,bb);
+      if(ch)rels.push({type:'chung',cls:'rel-chung',text:ch,pair,label:'충'});
+      
+      const hy=isHyung(ba,bb);
+      if(hy)rels.push({type:'hyung',cls:'rel-hyung',text:BH[ba]+BH[bb],pair,label:'형·'+hy});
+      
+      const pa=isPa(ba,bb);
+      if(pa)rels.push({type:'pa',cls:'rel-pa',text:pa,pair,label:'파'});
+      
+      const hae=isHae(ba,bb);
+      if(hae)rels.push({type:'hae',cls:'rel-hae',text:hae,pair,label:'해'});
+      
+      const wj=isWonjin(ba,bb);
+      if(wj)rels.push({type:'wonjin',cls:'rel-wonjin',text:wj,pair,label:'원진'});
+      
+      const gk=isGyeokgak(ba,bb);
+      if(gk)rels.push({type:'gyeokgak',cls:'rel-gyeokgak',text:gk,pair,label:'격각'});
+    }
+  }
+  return rels;
+}
+
+
+function calcSinsal(dayS,dayB,daySI,allBranches,yearB){
+  let sins=[];
+  
+  // 일주 자체 신살
+  if(GOEGANG.has(daySI))sins.push({name:'괴강살',type:'teuk',where:'일주'});
+  if(NACHAE.has(daySI))sins.push({name:'나체도화',type:'teuk',where:'일주'});
+  if(GEUMSHIN.has(daySI))sins.push({name:'금신',type:'teuk',where:'일주'});
+  
+  const labels=['시지','일지','월지','연지'];
+  for(let p=0;p<allBranches.length;p++){
+    const b=allBranches[p];if(b<0)continue;
+    const lbl=labels[p];
+    
+    // 일간 기준 신살
+    if(CHEONUL[dayS].includes(b))sins.push({name:'천을귀인',type:'gil',where:lbl});
+    if(MUNCHANG[dayS]===b)sins.push({name:'문창귀인',type:'gil',where:lbl});
+    if(HAKDANG[dayS]===b)sins.push({name:'학당귀인',type:'gil',where:lbl});
+    if(YANGIN[dayS]===b)sins.push({name:'양인살',type:'hyung',where:lbl});
+    
+    // 연지 기준 12신살
+    const sinName=get12Sinsal(yearB,b);
+    const gilSins=['장성살','화개살'];
+    const teukSins=['역마살','도화살','반안살','천살','지살','연살','월살'];
+    const hyungSins=['겁살','재살','망신살'];
+    if(gilSins.includes(sinName))sins.push({name:sinName,type:'gil',where:lbl});
+    else if(hyungSins.includes(sinName))sins.push({name:sinName,type:'hyung',where:lbl});
+    else if(teukSins.includes(sinName))sins.push({name:sinName,type:'teuk',where:lbl});
+  }
+  return sins;
+}
+
+// 기둥별 신살 (사주표 내 표시용)
+function pillarSinsal(dayS,dayB,daySI,branch,pillarIdx,yearB){
+  let tags=[];
+  if(branch<0)return tags;
+  
+  if(pillarIdx===1){
+    if(GOEGANG.has(daySI))tags.push('괴강');
+    if(NACHAE.has(daySI))tags.push('나체도화');
+    if(GEUMSHIN.has(daySI))tags.push('금신');
+  }
+  // 일간 기준 신살
+  if(CHEONUL[dayS].includes(branch))tags.push('천을귀인');
+  if(MUNCHANG[dayS]===branch)tags.push('문창');
+  if(HAKDANG[dayS]===branch)tags.push('학당');
+  if(YANGIN[dayS]===branch)tags.push('양인');
+  
+  // 연지 기준 12신살 — get12Sinsal로 통일
+  const sinName=get12Sinsal(yearB,branch);
+  const highlight=['역마살','도화살','화개살','겁살','재살','장성살','망신살','반안살','천살','지살'];
+  if(highlight.includes(sinName))tags.push(sinName.replace('살',''));
+  
+  return tags;
+}
+
+// === State ===
+let gender='male',calType='solar',lastResult=null;
+function setG(g,btn){gender=g;document.querySelectorAll('.g-btn').forEach(b=>b.classList.remove('act'));btn.classList.add('act');}
+function setCal(t,btn){calType=t;document.querySelectorAll('.cal-tog button').forEach(b=>b.classList.remove('act'));btn.classList.add('act');document.getElementById('leapRow').classList.toggle('show',t==='lunar');}
+
+// === Main Calc ===
+// === 빠른 입력 파서 ===
+function parseQuick(){
+  const raw=document.getElementById('quickInput').value.trim();
+  if(!raw){return;}
+  let text=raw;
+  
+  // 음력/양력 감지 (성별보다 먼저 — "음" 이 "음력"인지 확인)
+  if(/음력/.test(text)){
+    calType='lunar';
+    document.querySelectorAll('.cal-tog button').forEach(b=>b.classList.remove('act'));
+    document.querySelectorAll('.cal-tog button')[1].classList.add('act');
+    document.getElementById('leapRow').classList.add('show');
+    text=text.replace(/음력/g,'');
+  }else{
+    calType='solar';
+    document.querySelectorAll('.cal-tog button').forEach(b=>b.classList.remove('act'));
+    document.querySelectorAll('.cal-tog button')[0].classList.add('act');
+    document.getElementById('leapRow').classList.remove('show');
+    if(/양력/.test(text))text=text.replace(/양력/g,'');
+  }
+  
+  // 윤달 감지
+  if(/윤달/.test(text)){
+    document.getElementById('leapMonth').checked=true;
+    text=text.replace(/윤달/g,'');
+  }
+  
+  // 오전/오후 감지 (성별보다 먼저 제거 — "오"가 이름에 걸리지 않게)
+  let isPM=false, isAM=false;
+  if(/오후|PM|pm/.test(text)){isPM=true;text=text.replace(/오후|PM|pm/g,'');}
+  if(/오전|AM|am/.test(text)){isAM=true;text=text.replace(/오전|AM|am/g,'');}
+  
+  // 성별 감지 — 한글 word boundary는 lookbehind/lookahead로 처리
+  let genderFound=false;
+  if(/남자|남성/.test(text)){
+    gender='male';genderFound=true;text=text.replace(/남자|남성/g,'');
+  }else if(/여자|여성/.test(text)){
+    gender='female';genderFound=true;text=text.replace(/여자|여성/g,'');
+  }else if(/(?<![가-힣])남(?![가-힣])/.test(text)){
+    gender='male';genderFound=true;text=text.replace(/(?<![가-힣])남(?![가-힣])/g,'');
+  }else if(/(?<![가-힣])여(?![가-힣])/.test(text)){
+    gender='female';genderFound=true;text=text.replace(/(?<![가-힣])여(?![가-힣])/g,'');
+  }else if(/male/i.test(text)){
+    gender='male';genderFound=true;text=text.replace(/male/gi,'');
+  }else if(/female/i.test(text)){
+    gender='female';genderFound=true;text=text.replace(/female/gi,'');
+  }else if(/[♂]/.test(text)){
+    gender='male';genderFound=true;text=text.replace(/♂/g,'');
+  }else if(/[♀]/.test(text)){
+    gender='female';genderFound=true;text=text.replace(/♀/g,'');
+  }
+  if(genderFound){
+    document.querySelectorAll('.g-btn').forEach(b=>b.classList.remove('act'));
+    document.querySelectorAll('.g-btn')[gender==='male'?0:1].classList.add('act');
+  }
+  
+  // 단위 키워드를 공백으로 변환
+  text=text.replace(/년|월|일|시|분|세/g,' ').replace(/[.\-\/\:,]/g,' ');
+  
+  // 이름 추출 — 숫자/공백이 아닌 한글·영문 2글자 이상 덩어리
+  let name='';
+  const nameMatch=text.match(/[가-힣a-zA-Z]{2,}/g);
+  if(nameMatch){
+    name=nameMatch.join(' ');
+    nameMatch.forEach(n=>{text=text.replace(n,'');});
+  }
+  
+  // 남은 숫자 추출
+  const nums=text.match(/\d+/g);
+  if(!nums||nums.length<3){
+    document.getElementById('quickInput').style.borderColor='#ef5350';
+    setTimeout(()=>{document.getElementById('quickInput').style.borderColor='';},1500);
+    return;
+  }
+  
+  const year=parseInt(nums[0]);
+  const month=parseInt(nums[1]);
+  const day=parseInt(nums[2]);
+  let hour=-1;
+  
+  if(nums.length>=4){
+    hour=parseInt(nums[3]);
+    if(isPM&&hour<12)hour+=12;
+    if(isAM&&hour===12)hour=0;
+  }
+  
+  // 유효성 검증
+  if(year<1300||year>2100||month<1||month>12||day<1||day>31){
+    document.getElementById('quickInput').style.borderColor='#ef5350';
+    setTimeout(()=>{document.getElementById('quickInput').style.borderColor='';},1500);
+    return;
+  }
+  
+  // 기존 입력창에 반영
+  document.getElementById('year').value=year;
+  document.getElementById('month').value=month;
+  document.getElementById('day').value=day;
+  document.getElementById('hour').value=hour;
+  if(name)document.getElementById('pname').value=name;
+  
+  // 성공 피드백
+  document.getElementById('quickInput').style.borderColor='var(--gold)';
+  setTimeout(()=>{document.getElementById('quickInput').style.borderColor='';},800);
+}
+
+function calc(){
+  const y=+document.getElementById('year').value,m=+document.getElementById('month').value,d=+document.getElementById('day').value,h=+document.getElementById('hour').value;
+  if(!y||!m||!d||y<1300||y>2100){alert('올바른 날짜를 입력하세요 (1300~2100)');return;}
+  
+  const btn=document.getElementById('calcBtn');btn.disabled=true;
+  setTimeout(()=>{
+    try{
+      let sY=y,sM=m,sD=d,conv='';
+      if(calType==='lunar'){
+        const il=document.getElementById('leapMonth').checked;
+        const r=l2s(y,m,d,il);
+        if(!r){alert('해당 음력 날짜를 찾을 수 없습니다.');btn.disabled=false;return;}
+        sY=r.y;sM=r.m;sD=r.d;
+        conv=`음력 ${y}년 ${il?'윤':''}${m}월 ${d}일 → 양력 ${sY}년 ${sM}월 ${sD}일`;
+      }
+      
+      const ij=findST(sY-1,315);
+      const yP=yearP(sY,sM,sD,h,ij),mP=monthP(sY,sM,sD,h,yP.s),dP=dayP(sY,sM,sD),hP=hourP(h,dP.s);
+      const mSI=getSI(mP.s,mP.b);
+      
+      // 대운
+      const daeun=calcDaeun(sY,sM,sD,h,gender,yP.s,mSI);
+      
+      lastResult={yP,mP,dP,hP,sY,sM,sD,h,daeun,gender,origY:y,origM:m,origD:d,calType,conv};
+      
+      render(lastResult);
+    }catch(e){alert('오류: '+e.message);console.error(e);}
+    finally{btn.disabled=false;}
+  },30);
+}
+
+// === Render ===
+function render(R){
+  const {yP,mP,dP,hP,sY,sM,sD,h,daeun,gender:g,origY,origM,origD,conv}=R;
+  document.getElementById('result').classList.add('show');
+  document.getElementById('seunPanel').classList.remove('open');
+  
+  // Header
+  const cn=document.getElementById('convNote');
+  if(conv){cn.textContent=conv;cn.style.display='block';}else cn.style.display='none';
+  document.getElementById('resTit').innerHTML=`${g==='male'?'乾命':'坤命'} ${document.getElementById('pname').value||''}`;
+  const hs=h>=0?h+'시':'시간미상';
+  let ds=`양력 ${sY}년 ${sM}월 ${sD}일 ${hs}`;
+  if(R.calType==='lunar')ds=`음력 ${origY}.${origM}.${origD} (양력 ${sY}.${sM}.${sD}) ${hs}`;
+  document.getElementById('resDt').textContent=ds;
+  
+  // Pillars array: [시,일,월,연]
+  const ps=[{l:'시주',d:hP},{l:'일주',d:dP},{l:'월주',d:mP},{l:'연주',d:yP}];
+  
+  // Build saju table
+  let t='<tr><th style="width:56px"></th><th>시주 · 時柱</th><th>일주 · 日柱</th><th>월주 · 月柱</th><th>연주 · 年柱</th></tr>';
+  
+  // 천간 십신
+  t+='<tr><td class="lbl">십신</td>';
+  for(let i=0;i<4;i++){
+    if(!ps[i].d)t+='<td>—</td>';
+    else if(i===1)t+='<td class="ss ilgan">일간</td>';
+    else t+='<td class="ss">'+ss(dP.s,ps[i].d.s)+'</td>';
+  }t+='</tr>';
+  
+  // 천간
+  t+='<tr><td class="lbl">천간</td>';
+  for(let i=0;i<4;i++){
+    if(!ps[i].d)t+='<td class="hanja" style="color:var(--td)">？</td>';
+    else t+=`<td class="hanja ${ecls(ps[i].d.s)}">${SH[ps[i].d.s]}</td>`;
+  }t+='</tr>';
+  
+  // 지지
+  t+='<tr><td class="lbl">지지</td>';
+  for(let i=0;i<4;i++){
+    if(!ps[i].d)t+='<td class="hanja" style="color:var(--td)">？</td>';
+    else t+=`<td class="hanja ${eclsB(ps[i].d.b)}">${BH[ps[i].d.b]}</td>`;
+  }t+='</tr>';
+  
+  // 지지 본기 십신
+  t+='<tr><td class="lbl">십신</td>';
+  for(let i=0;i<4;i++){
+    if(!ps[i].d)t+='<td>—</td>';
+    else{t+='<td class="ss">'+ss(dP.s,JJ[ps[i].d.b][0])+'</td>';}
+  }t+='</tr>';
+  
+  // Separator
+  t+='<tr class="sep"><td colspan="5"></td></tr>';
+  
+  // 지장간 (여기→중기→본기 순서, 위→아래)
+  const jjOrder=[2,1,0]; // 여기, 중기, 본기
+  const jjLabel=['여기','중기','본기'];
+  for(let ri=0;ri<3;ri++){
+    const r=jjOrder[ri];
+    t+=`<tr class="jj-row"><td class="lbl" style="font-size:9px;color:var(--td)">${jjLabel[ri]}</td>`;
+    for(let i=0;i<4;i++){
+      if(!ps[i].d){t+='<td>—</td>';continue;}
+      const stem=JJ[ps[i].d.b][r];
+      if(stem!==null&&stem!==undefined){
+        t+=`<td><span class="${ecls(stem)}">${SH[stem]}</span> <span class="ss">${ss(dP.s,stem)}</span></td>`;
+      }else t+='<td></td>';
+    }t+='</tr>';
+  }
+  
+  // Separator
+  t+='<tr class="sep"><td colspan="5"></td></tr>';
+  
+  // 십이운성
+  t+='<tr><td class="lbl">운성</td>';
+  for(let i=0;i<4;i++){
+    if(!ps[i].d)t+='<td>—</td>';
+    else t+=`<td class="ss">${TCN[tc(dP.s,ps[i].d.b)]}</td>`;
+  }t+='</tr>';
+  
+  // 기둥별 지향 (공망의 충)
+  t+='<tr><td class="lbl">지향</td>';
+  for(let i=0;i<4;i++){
+    if(!ps[i].d)t+='<td>—</td>';
+    else{
+      const psi=getSI(ps[i].d.s,ps[i].d.b);
+      const pgm=gm(psi);
+      const ji0=(pgm[0]+6)%12, ji1=(pgm[1]+6)%12;
+      t+=`<td class="ss">${Bh[ji0]}${Bh[ji1]}(${BH[ji0]}${BH[ji1]})지향</td>`;
+    }
+  }t+='</tr>';
+  
+  // 신살 (기둥별)
+  t+='<tr><td class="lbl">신살</td>';
+  for(let i=0;i<4;i++){
+    if(!ps[i].d){t+='<td>—</td>';continue;}
+    const tags=pillarSinsal(dP.s,dP.b,dP.si,ps[i].d.b,i,yP.b);
+    t+='<td class="sinsal-cell">'+tags.map(x=>'<span>'+x+'</span>').join('')+'</td>';
+  }t+='</tr>';
+  
+  document.getElementById('sajuTbl').innerHTML=t;
+  
+  // 신살 종합
+  const allB=[hP?hP.b:-1,dP.b,mP.b,yP.b];
+  const sins=calcSinsal(dP.s,dP.b,dP.si,allB,yP.b);
+  let sh='';
+  const seen=new Set();
+  for(const s of sins){
+    const key=s.name;
+    if(!seen.has(key)){
+      seen.add(key);
+      sh+=`<span class="tag ${s.type}">${s.name}</span>`;
+    }
+  }
+  document.getElementById('sinList').innerHTML=sh||'<span style="color:var(--td)">해당 없음</span>';
+  
+  // 사령 계산 → 신살 종합에 표시 — ★ 정밀 시각 비교
+  const JJ_DAYS=[[10,0,20],[9,3,18],[7,7,16],[10,0,20],[9,3,18],[7,7,16],[10,9,11],[9,3,18],[7,7,16],[10,0,20],[9,3,18],[7,5,18]];
+  const bJD2=birthJD_UT(sY,sM,sD,h);
+  let jgs2=[];
+  for(let yr=sY-1;yr<=sY+1;yr++)for(let i=0;i<12;i++){let cy=yr;if(JL[i]>=315)cy=yr-1;jgs2.push({jd:findST(cy,JL[i]),mi:i});}
+  jgs2.sort((a,b)=>a.jd-b.jd);
+  let jeolgiJD=jgs2[0].jd;
+  for(let i=jgs2.length-1;i>=0;i--)if(bJD2>=jgs2[i].jd){jeolgiJD=jgs2[i].jd;break;}
+  const daysSinceJeolgi=Math.floor(bJD2-jeolgiJD);
+  const mb=mP.b,days=JJ_DAYS[mb];
+  let saryeongIdx,saryeongLabel;
+  if(daysSinceJeolgi<days[0]){saryeongIdx=JJ[mb][2];saryeongLabel='여기';}
+  else if(days[1]>0&&daysSinceJeolgi<days[0]+days[1]){saryeongIdx=JJ[mb][1];saryeongLabel='중기';}
+  else{saryeongIdx=JJ[mb][0];saryeongLabel='본기';}
+  const saryeongStr=saryeongIdx!==null?`${SH[saryeongIdx]}(${Sh[saryeongIdx]})`:'-';
+  document.getElementById('sinList').innerHTML+=`<span class="tag teuk" style="margin-left:12px;border-color:var(--gold-d);color:var(--gold)">사령: ${saryeongStr} · ${saryeongLabel} · 절기 후 ${daysSinceJeolgi}일</span>`;
+  
+  // 대운 (클릭하면 세운 펼침)
+  const curYear=new Date().getFullYear();
+  const birthYear=sY;
+  let dh='';
+  let currentDuIdx=-1;
+  for(let i=daeun.pillars.length-1;i>=0;i--){
+    const du=daeun.pillars[i];
+    const yr=birthYear+du.age;
+    const isCur=curYear>=yr&&curYear<yr+10;
+    if(isCur)currentDuIdx=i;
+    dh+=`<div class="un-card${isCur?' current':''}" data-du-idx="${i}" onclick="selectDaeun(${i})">
+      <div class="un-age">${du.age}세</div>
+      <div class="un-hanja"><span class="${ecls(du.s)}">${SH[du.s]}</span><span class="${eclsB(du.b)}">${BH[du.b]}</span></div>
+      <div class="un-ss">${ss(dP.s,du.s)} / ${ss(dP.s,JJ[du.b][0])}</div>
+      <div class="un-sinsal">${TCN[tc(dP.s,du.b)]}</div>
+      <div class="un-sinsal">${get12Sinsal(yP.b,du.b)}</div>
+      <div class="un-year">${yr}~${yr+9}</div>
+    </div>`;
+  }
+  document.getElementById('daeunRow').innerHTML=dh;
+  
+  // 세운 펼침 함수 (전역)
+  window._sajuCtx={daeun,birthYear,dP,yP,JJ,SH,BH,Sh,Bh,ecls,eclsB,ss,tc,get12Sinsal,TCN,BE,EC,
+    // 합충형파해 체크 함수들
+    checkRels:function(duB,seB,dayB,monB,yearB){
+      const rels=[];
+      const YH=[[0,1],[2,11],[3,10],[4,9],[5,8],[6,7]];
+      const CH=[[0,6],[1,7],[2,8],[3,9],[4,10],[5,11]];
+      const PA=[[0,9],[1,4],[2,11],[3,6],[5,8],[7,10]];
+      const HAE=[[0,7],[1,6],[2,5],[3,4],[8,11],[9,10]];
+      const SH3=[[2,6,10,'火'],[8,0,4,'水'],[5,9,1,'金'],[11,3,7,'木']];
+      const HYUNG=[[2,5,8],[1,10,7],[0,3],[4],[6],[9],[11]];
+      // 세운 지지 vs 일지, 월지, 연지, 대운 지지 비교
+      const targets=[{b:dayB,l:'일'},{b:monB,l:'월'},{b:yearB,l:'연'},{b:duB,l:'운'}];
+      targets.forEach(t=>{
+        if(t.b===seB&&t.l!=='운')return; // 같은건 skip (자형 제외)
+        const pair=[seB,t.b];
+        YH.forEach(p=>{if((pair[0]===p[0]&&pair[1]===p[1])||(pair[0]===p[1]&&pair[1]===p[0]))rels.push({type:'hab',text:BH[seB]+BH[t.b]+'합('+t.l+')'});});
+        CH.forEach(p=>{if((pair[0]===p[0]&&pair[1]===p[1])||(pair[0]===p[1]&&pair[1]===p[0]))rels.push({type:'chung',text:BH[seB]+BH[t.b]+'충('+t.l+')'});});
+        PA.forEach(p=>{if((pair[0]===p[0]&&pair[1]===p[1])||(pair[0]===p[1]&&pair[1]===p[0]))rels.push({type:'etc',text:BH[seB]+BH[t.b]+'파('+t.l+')'});});
+        HAE.forEach(p=>{if((pair[0]===p[0]&&pair[1]===p[1])||(pair[0]===p[1]&&pair[1]===p[0]))rels.push({type:'etc',text:BH[seB]+BH[t.b]+'해('+t.l+')'});});
+        // 형
+        HYUNG.forEach(g=>{if(g.length>=2){const f=[seB,t.b].filter(x=>g.includes(x));if(f.length>=2&&f[0]!==f[1])rels.push({type:'hyung',text:BH[seB]+BH[t.b]+'형('+t.l+')'});}
+          if(g.length===1&&seB===g[0]&&t.b===g[0])rels.push({type:'hyung',text:BH[seB]+BH[t.b]+'자형('+t.l+')'});
+        });
+      });
+      return rels;
+    }
+  };
+  
+  window.selectDaeun=function(idx){
+    // 토글: 이미 선택된 것 클릭하면 닫기
+    const panel=document.getElementById('seunPanel');
+    const cards=document.querySelectorAll('.un-card[data-du-idx]');
+    const wasSelected=cards[daeun.pillars.length-1-idx]?.classList.contains('selected');
+    cards.forEach(c=>c.classList.remove('selected'));
+    if(wasSelected){panel.classList.remove('open');return;}
+    
+    cards[daeun.pillars.length-1-idx]?.classList.add('selected');
+    const ctx=window._sajuCtx;
+    const du=ctx.daeun.pillars[idx];
+    const yr=ctx.birthYear+du.age;
+    
+    // 타이틀
+    document.getElementById('seunTitle').innerHTML=
+      `<span class="${ctx.ecls(du.s)}">${ctx.SH[du.s]}</span><span class="${ctx.eclsB(du.b)}">${ctx.BH[du.b]}</span> 대운 (${du.age}~${du.age+9}세)`+
+      `<span class="du-info">${ctx.ss(ctx.dP.s,du.s)}/${ctx.ss(ctx.dP.s,ctx.JJ[du.b][0])} · ${ctx.TCN[ctx.tc(ctx.dP.s,du.b)]} · ${ctx.get12Sinsal(ctx.yP.b,du.b)}</span>`;
+    
+    // 세운 10년 생성
+    let sh='';
+    for(let y=yr;y<=yr+9;y++){
+      const seS=((y-4)%10+10)%10, seB=((y-4)%12+12)%12;
+      const age=y-ctx.birthYear;
+      const isNow=y===curYear;
+      // 합충형파해 체크
+      const rels=ctx.checkRels(du.b,seB,ctx.dP.b,lastResult.mP.b,ctx.yP.b);
+      let relHtml='';
+      rels.forEach(r=>{
+        const cls=r.type==='chung'?'rel-chung':r.type==='hab'?'rel-hab':r.type==='hyung'?'rel-hyung':'rel-etc';
+        relHtml+=`<span class="${cls}">${r.text}</span>`;
+      });
+      
+      sh+=`<div class="seun-card${isNow?' now':''}">
+        <div class="seun-age">${age}세</div>
+        <div class="seun-hanja"><span class="${ctx.ecls(seS)}">${ctx.SH[seS]}</span><span class="${ctx.eclsB(seB)}">${ctx.BH[seB]}</span></div>
+        <div class="seun-ss">${ctx.ss(ctx.dP.s,seS)} / ${ctx.ss(ctx.dP.s,ctx.JJ[seB][0])}</div>
+        <div class="seun-sinsal">${ctx.TCN[ctx.tc(ctx.dP.s,seB)]}</div>
+        <div class="seun-sinsal">${ctx.get12Sinsal(ctx.yP.b,seB)}</div>
+        <div class="seun-age">${y}년</div>
+        ${relHtml?'<div class="seun-rel">'+relHtml+'</div>':''}
+      </div>`;
+    }
+    document.getElementById('seunRow').innerHTML=sh;
+    panel.classList.add('open');
+    // 스크롤 to 패널
+    setTimeout(()=>panel.scrollIntoView({behavior:'smooth',block:'nearest'}),100);
+  };
+  
+  // 현재 대운 자동 펼침
+  if(currentDuIdx>=0)selectDaeun(currentDuIdx);
+  
+  // 합충형파해원진격각
+  const relPillars=[
+    hP?{s:hP.s,b:hP.b}:null,
+    {s:dP.s,b:dP.b},
+    {s:mP.s,b:mP.b},
+    {s:yP.s,b:yP.b}
+  ];
+  const rels=calcRelations(relPillars);
+  if(rels.length){
+    let rh='<div class="rel-grid">';
+    for(const r of rels){
+      rh+=`<div class="rel-tag ${r.cls}"><span class="pair">${r.text}</span>${r.label}<span class="lbl">(${r.pair})</span></div>`;
+    }
+    rh+='</div>';
+    document.getElementById('relBox').innerHTML=rh;
+  }else{
+    document.getElementById('relBox').innerHTML='<div class="rel-none">해당 없음</div>';
+  }
+  
+  document.getElementById('result').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// === 인물 DB ===
+const DB_KEY='byeolttang_saju_db';
+function dbLoad(){try{return JSON.parse(localStorage.getItem(DB_KEY))||[];}catch{return[];}}
+function dbSaveStore(arr){localStorage.setItem(DB_KEY,JSON.stringify(arr));}
+
+function dbSave(){
+  if(!lastResult){alert('먼저 사주를 확인하세요.');return;}
+  const name=document.getElementById('pname').value||'이름없음';
+  const R=lastResult;
+  const entry={
+    id:Date.now(),name,
+    y:R.origY,m:R.origM,d:R.origD,h:R.h,
+    cal:R.calType,leap:document.getElementById('leapMonth').checked,
+    gender:R.gender,
+    saju:`${Sh[R.yP.s]}${Bh[R.yP.b]} ${Sh[R.mP.s]}${Bh[R.mP.b]} ${Sh[R.dP.s]}${Bh[R.dP.b]}${R.hP?' '+Sh[R.hP.s]+Bh[R.hP.b]:''}`,
+    hanjaP:`${SH[R.dP.s]}${BH[R.dP.b]}`
+  };
+  const db=dbLoad();db.unshift(entry);dbSaveStore(db);dbRender();
+  alert(`"${name}" 저장 완료`);
+}
+
+function dbRender(){
+  const db=dbLoad();
+  const q=(document.getElementById('dbSearch').value||'').toLowerCase();
+  const filtered=q?db.filter(e=>e.name.toLowerCase().includes(q)||e.saju.includes(q)||(e.hanjaP||'').includes(q)):db;
+  const el=document.getElementById('dbList');
+  if(!filtered.length){el.innerHTML='<div style="padding:12px;color:var(--td);font-size:12px;text-align:center">'+(db.length?'검색 결과 없음':'저장된 인물이 없습니다')+'</div>';return;}
+  el.innerHTML=filtered.map(e=>`<div class="db-item" onclick="dbLoadEntry(${e.id})">
+    <span class="name">${e.name} <span style="color:var(--gold-d)">${e.hanjaP||''}</span></span>
+    <span class="info">${e.cal==='lunar'?'음':'양'} ${e.y}.${e.m}.${e.d} ${e.gender==='male'?'남':'여'} · ${e.saju}</span>
+    <span class="del" onclick="event.stopPropagation();dbDel(${e.id})">✕</span>
+  </div>`).join('');
+}
+
+function dbLoadEntry(id){
+  const e=dbLoad().find(x=>x.id===id);if(!e)return;
+  document.getElementById('year').value=e.y;
+  document.getElementById('month').value=e.m;
+  document.getElementById('day').value=e.d;
+  document.getElementById('hour').value=e.h;
+  document.getElementById('pname').value=e.name;
+  if(e.cal==='lunar'){setCal('lunar',document.querySelectorAll('.cal-tog button')[1]);document.getElementById('leapMonth').checked=e.leap||false;}
+  else setCal('solar',document.querySelectorAll('.cal-tog button')[0]);
+  if(e.gender==='female')setG('female',document.querySelectorAll('.g-btn')[1]);
+  else setG('male',document.querySelectorAll('.g-btn')[0]);
+  calc();
+}
+
+function dbDel(id){if(!confirm('삭제하시겠습니까?'))return;const db=dbLoad().filter(x=>x.id!==id);dbSaveStore(db);dbRender();}
+function dbClear(){if(!confirm('전체 삭제하시겠습니까?'))return;dbSaveStore([]);dbRender();}
+
+// Init
+dbRender();
+</script>
+</body>
+</html>
