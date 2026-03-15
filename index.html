@@ -69,8 +69,8 @@ header .sub{font-size:13px;color:var(--ts);font-weight:300}
 .saju-tbl .yr-lbl{font-size:9px;color:var(--td);text-align:right;padding-right:8px}
 .saju-tbl tr.yr-row{display:none}
 .saju-tbl.show-yr tr.yr-row{display:table-row}
-.iljin-tog-wrap{margin-top:8px}
-.iljin-tog{background:var(--card2);border:1px solid var(--bdr);color:var(--td);padding:4px 14px;border-radius:5px;cursor:pointer;font-size:11px;font-family:inherit}
+.iljin-tog{background:var(--card2);border:1px solid var(--bdr);color:var(--td);padding:9px 20px;border-radius:8px;cursor:pointer;font-size:13px;font-family:'Noto Serif KR',serif;font-weight:600;letter-spacing:1px;transition:all .2s}
+.iljin-tog:hover{background:rgba(201,168,76,.08);border-color:var(--gold)}
 .iljin-tog.act{border:1.5px solid var(--gold);color:var(--tp);font-weight:600;background:#fff}
 /* 만세력 달력 */
 .cal-section{margin-top:16px}
@@ -267,7 +267,7 @@ footer .fb{font-family:'Noto Serif KR',serif;color:var(--gold-d);font-size:11px}
 
 <div id="result">
 <div id="convNote" class="conv-note" style="display:none"></div>
-<div class="res-head"><div class="tit" id="resTit"></div><div class="dt" id="resDt"></div><div class="dt-sub" id="resDtSub"></div><div class="iljin-tog-wrap"><button class="iljin-tog" id="iljinTog" onclick="toggleIljin()">일진 보기</button></div></div>
+<div class="res-head"><div class="tit" id="resTit"></div><div class="dt" id="resDt"></div><div class="dt-sub" id="resDtSub"></div></div>
 
 <table class="saju-tbl" id="sajuTbl"></table>
 
@@ -334,6 +334,7 @@ footer .fb{font-family:'Noto Serif KR',serif;color:var(--gold-d);font-size:11px}
 <div class="note">※ 별땅연구소 <em>30분 보정 시간대</em> 적용 · 시간 모르면 '모름' 선택 (시주 생략)</div>
 <div class="inp-row" style="gap:10px">
   <button class="btn-calc" id="calcBtn" onclick="calc()">사주 확인하기</button>
+  <button class="iljin-tog" id="iljinTog" onclick="toggleIljin()">일진 보기</button>
   <button class="btn-save" onclick="dbSave()">신규 저장</button>
   <button class="btn-update" id="btnUpdate" onclick="dbUpdate()" style="display:none">수정 저장</button>
 </div>
