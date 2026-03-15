@@ -375,6 +375,8 @@ footer .fb{font-family:'Noto Serif KR',serif;color:var(--gold-d);font-size:11px}
 <div class="db-actions-v" style="margin-top:8px">
   <button class="db-btn" onclick="document.getElementById('dbImportFile').click()">불러오기(JSON)</button>
   <input type="file" id="dbImportFile" accept=".json" style="display:none" onchange="dbImportJSON(event)">
+  <button class="db-btn" onclick="document.getElementById('dbMergeFile').click()" style="color:var(--wood)">병합(JSON)</button>
+  <input type="file" id="dbMergeFile" accept=".json" style="display:none" onchange="dbMergeJSON(event)">
   <button class="db-btn" onclick="dbExportJSON()">내보내기</button>
   <button class="db-btn" onclick="dbClear()">전체 삭제</button>
 </div>
@@ -1760,6 +1762,52 @@ async function dbImportJSON(event){
     document.body.removeChild(prog);
     await dbRender();
     alert(`${arr.length}명 불러오기 완료!`);
+  }catch(e){alert('파일 오류: '+e.message);}
+  event.target.value='';
+}
+async function dbMergeJSON(event){
+  const file=event.target.files[0];if(!file)return;
+  const text=await file.text();
+  try{
+    const data=JSON.parse(text);
+    const arr=data.db||data;
+    if(!Array.isArray(arr))throw new Error('배열이 아닙니다');
+    // 기존 DB 전체 로드 → 이름+생년월일 키로 중복 판별
+    const existing=await idbAll();
+    const keySet=new Set();
+    for(const r of existing){
+      const k=`${(r.name||'').trim()}|${r.year}|${r.month}|${r.day}`;
+      keySet.add(k);
+    }
+    // 신규만 필터링
+    const newItems=[];
+    const dupes=[];
+    for(const r of arr){
+      const k=`${(r.name||'').trim()}|${r.year}|${r.month}|${r.day}`;
+      if(keySet.has(k)){dupes.push(r);}
+      else{newItems.push(r);keySet.add(k);}
+    }
+    if(newItems.length===0){
+      alert(`병합 완료: 신규 0명 (중복 ${dupes.length}명 건너뜀)`);
+      event.target.value='';return;
+    }
+    const msg=`파일: ${arr.length}명 중\n· 신규 추가: ${newItems.length}명\n· 중복 건너뜀: ${dupes.length}명\n\n병합하시겠습니까?`;
+    if(!confirm(msg)){event.target.value='';return;}
+    // 진행 표시
+    const prog=document.createElement('div');
+    prog.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--card);border:2px solid var(--wood);border-radius:12px;padding:24px;z-index:9999;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.3);min-width:280px';
+    prog.innerHTML=`<div style="font-size:14px;color:var(--wood);margin-bottom:8px">인물DB 병합</div><div id="mergeProg" style="font-size:12px;color:var(--ts)">준비 중...</div>`;
+    document.body.appendChild(prog);
+    const CHUNK=500;
+    for(let i=0;i<newItems.length;i+=CHUNK){
+      const chunk=newItems.slice(i,i+CHUNK);
+      await idbAddBulk(chunk);
+      document.getElementById('mergeProg').textContent=`${Math.min(i+CHUNK,newItems.length)} / ${newItems.length}`;
+      await new Promise(r=>setTimeout(r,0));
+    }
+    document.body.removeChild(prog);
+    await dbRender();
+    alert(`병합 완료!\n· 신규 추가: ${newItems.length}명\n· 중복 건너뜀: ${dupes.length}명\n· 현재 총: ${existing.length+newItems.length}명`);
   }catch(e){alert('파일 오류: '+e.message);}
   event.target.value='';
 }
