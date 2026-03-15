@@ -1371,45 +1371,54 @@ function render(R){
     for(const g of ctx.SAMHAP_GROUPS){
       if(g.slice(0,3).includes(du.b)){duSamhapGroup=g;break;}
     }
-    // 첫 삼합년 인덱스 찾기 (대운 지지와 같은 삼합 그룹의 지지를 가진 첫 세운)
-    let firstSHIdx=-1;
+    // 삼합 히트 위치 찾기 (대운 지지와 같은 삼합 그룹의 지지가 세운에 등장하는 해)
     const seunBranches=[];
+    const samhapHits=[];
     for(let i=0;i<10;i++){
       const y=yr+i;
       const seB=((y-4)%12+12)%12;
       seunBranches.push(seB);
-      if(firstSHIdx<0&&duSamhapGroup&&duSamhapGroup.slice(0,3).includes(seB)){
-        firstSHIdx=i;
+      if(duSamhapGroup&&duSamhapGroup.slice(0,3).includes(seB)){
+        samhapHits.push(i);
       }
     }
-    // 시즌 라벨 배열: 첫 삼합년부터 봄→여름→가을→겨울 순환
+    // 시즌 라벨: 삼합 히트 위치가 봄을 결정, 마지막 히트=마무리 전환
+    // 봄에서 시작해 다음 봄(마무리)까지 돌아와야 성장을 측정할 수 있음
     const seasonMap=new Array(10).fill(null);
-    let mojakCount=0;
-    if(firstSHIdx>=0&&duSamhapGroup){
+    if(samhapHits.length>=2&&duSamhapGroup){
       const el=duSamhapGroup[3];
-      // 첫 삼합 전 해 = 접목
-      for(let i=0;i<firstSHIdx;i++) seasonMap[i]={label:'접목',element:el};
-      const totalYears=10-firstSHIdx;
-      mojakCount=Math.floor(totalYears/4);
-      const sNames=['봄','여름','가을','겨울'];
-      for(let i=firstSHIdx;i<10;i++){
-        const pos=i-firstSHIdx;
-        const cycleNum=Math.floor(pos/4);
-        const posInCycle=pos%4;
-        if(cycleNum<mojakCount){
-          // 완성된 사이클
-          if(posInCycle===0){
-            const cn=cycleNum+1;
-            const tag=mojakCount>=2?(cn===1?`${cn}모작 연습`:`${cn}모작 본격`):`${cn}모작 본격`;
-            seasonMap[i]={label:'봄',tag,element:el};
-          }else{
-            seasonMap[i]={label:sNames[posInCycle],element:el};
-          }
-        }else{
-          // 불완전 마지막 사이클: 봄 위치=마무리 전환, 나머지=접목
-          if(posInCycle===0) seasonMap[i]={label:'마무리 전환',element:el};
-          else seasonMap[i]={label:'접목',element:el};
+      const cycleCount=samhapHits.length-1; // 마지막 히트=마무리이므로 사이클 수=히트-1
+      // 히트 전 = 접목
+      for(let i=0;i<samhapHits[0];i++) seasonMap[i]={label:'접목',element:el};
+      // 각 사이클: 봄→여름→가을→겨울 분배
+      for(let c=0;c<cycleCount;c++){
+        const start=samhapHits[c];
+        const end=samhapHits[c+1];
+        const span=end-start; // 두 히트 간 거리
+        const cn=c+1;
+        const tag=cycleCount>=2?(cn===1?`${cn}모작 연습`:`${cn}모작 본격`):`${cn}모작 본격`;
+        seasonMap[start]={label:'봄',tag,element:el};
+        // 봄과 마무리 사이를 여름→가을→겨울로 분배
+        const sNames=['여름','가을','겨울'];
+        for(let j=1;j<span;j++){
+          const sIdx=Math.min(j-1,2); // 3개(여름가을겨울) 이상이면 겨울 반복
+          seasonMap[start+j]={label:sNames[sIdx],element:el};
         }
+      }
+      // 마지막 히트 = 마무리 전환
+      const lastHit=samhapHits[samhapHits.length-1];
+      seasonMap[lastHit]={label:'마무리 전환',element:el};
+      // 마무리 후 = 접목
+      for(let i=lastHit+1;i<10;i++) seasonMap[i]={label:'접목',element:el};
+    }else if(samhapHits.length===1&&duSamhapGroup){
+      // 히트 1개: 봄은 있지만 다음 봄 없이 끝남 → 미완성
+      const el=duSamhapGroup[3];
+      for(let i=0;i<samhapHits[0];i++) seasonMap[i]={label:'접목',element:el};
+      seasonMap[samhapHits[0]]={label:'봄',tag:'1모작 본격',element:el};
+      const sNames=['여름','가을','겨울'];
+      for(let j=1;j<10-samhapHits[0];j++){
+        const sIdx=Math.min(j-1,2);
+        seasonMap[samhapHits[0]+j]={label:sNames[sIdx],element:el};
       }
     }
 
