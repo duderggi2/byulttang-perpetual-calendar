@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>별땅역학연구소 — 사주 비교</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700;900&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#ffffff;--card:#f7f5f0;--card2:#eeece5;--gold:#9a7a2e;--gold-l:#7a6020;--gold-d:#b8952e;--tp:#1a1a18;--ts:#5a5850;--td:#9a9890;--wood:#2e7d4f;--fire:#c03030;--earth:#a07e28;--metal:#8a8a9a;--water:#1a3d7a;--bdr:rgba(100,80,40,.15);--r:10px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--tp);font-family:'Noto Sans KR',sans-serif;min-height:100vh;font-size:14px}
+.wrap{max-width:1800px;margin:0 auto;padding:24px 16px}
+header{text-align:center;margin-bottom:20px}
+header .brand{font-family:'Noto Serif KR',serif;font-size:12px;letter-spacing:6px;color:var(--gold-d)}
+header h1{font-family:'Noto Serif KR',serif;font-size:28px;font-weight:900;color:var(--gold)}
+header .sub{font-size:13px;color:var(--ts);font-weight:300;margin-top:4px}
+.nav-link{display:inline-block;margin-top:8px;color:var(--gold);font-size:12px;text-decoration:none;border:1px solid var(--gold-d);padding:4px 14px;border-radius:6px;transition:all .2s}
+.nav-link:hover{background:rgba(201,168,76,.12)}
+
+/* 입력 영역 */
+.inp-area{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:16px 20px;margin-bottom:20px;display:flex;gap:10px;align-items:end;flex-wrap:wrap}
+.inp-area .fg{display:flex;flex-direction:column;gap:3px}
+.inp-area .fg label{font-size:10px;color:var(--ts);letter-spacing:1px}
+.inp-area .fg input,.inp-area .fg select{background:var(--bg);border:1px solid var(--bdr);border-radius:5px;color:var(--tp);font-family:inherit;font-size:13px;padding:6px 8px;outline:none}
+.inp-area .fg input:focus,.inp-area .fg select:focus{border-color:var(--gold)}
+.quick-row{display:flex;gap:6px;flex:1;min-width:300px}
+.quick-inp{flex:1;background:var(--bg);border:1px solid var(--bdr);border-radius:8px;color:var(--tp);font-family:inherit;font-size:13px;padding:8px 14px;outline:none}
+.quick-inp:focus{border-color:var(--gold)}
+.quick-inp::placeholder{color:var(--td);font-size:12px}
+.inp-btn{background:linear-gradient(135deg,var(--gold-d),var(--gold));color:#fff;border:none;border-radius:8px;padding:8px 20px;font-family:'Noto Serif KR',serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:1px;white-space:nowrap}
+.inp-btn:hover{box-shadow:0 4px 12px rgba(201,168,76,.25)}
+.inp-btn.secondary{background:var(--bg);color:var(--gold);border:1.5px solid var(--gold-d);font-weight:600}
+.inp-btn.secondary:hover{background:rgba(201,168,76,.08)}
+.inp-btn.clear{background:var(--card2);color:var(--td);border:1px solid var(--bdr);font-weight:400;font-size:12px;padding:8px 14px}
+.inp-count{font-size:12px;color:var(--td);white-space:nowrap;align-self:center}
+.g-btn{background:var(--card2);border:1px solid var(--bdr);color:var(--td);padding:5px 10px;border-radius:5px;cursor:pointer;font-size:12px;font-family:inherit}
+.g-btn.act{border:1.5px solid var(--gold);color:var(--tp);font-weight:600;background:#fff}
+.cal-tog{display:flex;gap:0;border-radius:5px;overflow:hidden;border:1px solid var(--bdr)}
+.cal-tog button{background:var(--card2);border:none;color:var(--td);padding:5px 12px;font-size:12px;font-family:inherit;cursor:pointer}
+.cal-tog button.act{background:#fff;color:var(--tp);font-weight:600;box-shadow:inset 0 0 0 1.5px var(--gold)}
+.cal-tog button+button{border-left:1px solid var(--bdr)}
+
+/* 상세 입력 토글 */
+.detail-row{display:none;gap:8px;flex-wrap:wrap;align-items:end;width:100%;margin-top:8px}
+.detail-row.show{display:flex}
+
+/* DB Popup */
+.db-popup{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:999;display:none;justify-content:center;align-items:center}
+.db-popup.show{display:flex}
+.db-modal{background:var(--bg);border-radius:12px;padding:20px;width:90%;max-width:500px;max-height:70vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.2)}
+.db-modal h3{font-family:'Noto Serif KR',serif;font-size:15px;color:var(--gold-l);margin-bottom:10px}
+.db-search-inp{width:100%;background:var(--card);border:1px solid var(--bdr);border-radius:6px;padding:8px 12px;font-family:inherit;font-size:13px;outline:none;margin-bottom:10px}
+.db-search-inp:focus{border-color:var(--gold)}
+.db-modal-list{overflow-y:auto;flex:1;min-height:200px}
+.db-modal-item{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-bottom:1px solid rgba(0,0,0,.06);cursor:pointer;font-size:12px;transition:background .15s}
+.db-modal-item:hover{background:rgba(201,168,76,.08)}
+.db-modal-item .nm{font-weight:500;color:var(--tp)}
+.db-modal-item .info{color:var(--td);font-size:11px}
+.db-modal-close{text-align:right;margin-top:10px}
+.db-modal-close button{background:var(--card2);border:1px solid var(--bdr);color:var(--ts);padding:6px 18px;border-radius:6px;cursor:pointer;font-size:12px;font-family:inherit}
+
+/* 비교 그리드 */
+.compare-grid{display:flex;gap:16px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:8px;align-items:flex-start}
+.compare-col{flex:1;min-width:0;position:relative}
+.col-close{position:absolute;top:8px;right:10px;background:rgba(192,48,48,.08);border:1px solid rgba(192,48,48,.2);color:var(--fire);width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;z-index:5;opacity:.5;transition:all .15s}
+.col-close:hover{opacity:1;background:rgba(192,48,48,.15)}
+.col-header{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r) var(--r) 0 0;padding:14px 20px;text-align:center}
+.col-header .name{font-family:'Noto Serif KR',serif;font-weight:700;color:var(--gold-l)}
+.col-header .dt{font-size:11px;color:var(--ts);margin-top:3px}
+.col-header .gender{font-size:12px;color:var(--td)}
+.empty-msg{padding:60px 40px;text-align:center;color:var(--td);width:100%;font-size:14px;line-height:2}
+
+/* Saju Table */
+.saju-tbl{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--bdr);border-top:none;overflow:hidden}
+.saju-tbl th,.saju-tbl td{padding:4px 3px;text-align:center;border-bottom:1px solid var(--bdr);font-size:11px}
+.saju-tbl th{color:var(--td);font-weight:400;font-size:9px;letter-spacing:2px;background:rgba(0,0,0,.03)}
+.saju-tbl .lbl{color:var(--gold-d);font-size:9px;text-align:right;padding-right:6px;white-space:nowrap;width:44px}
+.saju-tbl .hanja{font-family:'Noto Serif KR',serif;font-weight:900;padding:6px 3px}
+.saju-tbl .ss{font-size:10px;color:var(--ts)}
+.saju-tbl .ilgan{color:var(--gold-l);font-weight:600}
+.saju-tbl .jj-row td{font-size:10px;padding:2px 3px}
+.saju-tbl .sep td{padding:0;height:2px;background:var(--bdr)}
+.saju-tbl .sinsal-cell{font-size:8px;color:var(--ts);line-height:1.4}
+.saju-tbl .sinsal-cell span{display:inline-block;background:rgba(201,168,76,.08);border:1px solid var(--bdr);border-radius:3px;padding:1px 3px;margin:1px;white-space:nowrap}
+.c-wood{color:var(--wood)}.c-fire{color:var(--fire)}.c-earth{color:var(--earth)}.c-metal{color:var(--metal)}.c-water{color:var(--water)}
+
+/* 오행 바 */
+.elem-bar{display:flex;height:20px;border-radius:5px;overflow:hidden;margin:6px 0}
+.elem-bar div{display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:500;min-width:0}
+.b-wood{background:rgba(46,125,79,.7);color:#fff}.b-fire{background:rgba(192,48,48,.7);color:#fff}
+.b-earth{background:rgba(160,126,40,.7);color:#fff}.b-metal{background:rgba(90,90,106,.5);color:#fff}
+.b-water{background:rgba(42,95,170,.7);color:#fff}
+
+/* 신살·관계 */
+.sin-list{display:flex;flex-wrap:wrap;gap:3px;padding:6px 0}
+.sin-tag{font-size:9px;padding:2px 6px;border-radius:3px;border:1px solid var(--bdr);color:var(--ts);background:rgba(0,0,0,.03)}
+.rel-tag{font-size:10px;padding:3px 8px;border-radius:4px;border:1px solid var(--bdr);display:inline-flex;align-items:center;gap:3px;margin:2px}
+.rel-tag .pair{font-family:'Noto Serif KR',serif;font-weight:700;font-size:11px}
+.rel-hap,.rel-ganhap{border-color:rgba(74,158,110,.4);color:var(--wood);background:rgba(74,158,110,.06)}
+.rel-samhap-火{border-color:rgba(192,48,48,.4);color:var(--fire);background:rgba(192,48,48,.06)}
+.rel-samhap-水{border-color:rgba(26,61,122,.4);color:var(--water);background:rgba(26,61,122,.06)}
+.rel-samhap-金{border-color:rgba(138,138,154,.4);color:var(--metal);background:rgba(138,138,154,.06)}
+.rel-samhap-木{border-color:rgba(46,125,79,.4);color:var(--wood);background:rgba(46,125,79,.06)}
+.rel-chung{border-color:rgba(214,69,69,.4);color:var(--fire);background:rgba(214,69,69,.06)}
+.rel-hyung{border-color:rgba(200,100,50,.4);color:#d87;background:rgba(200,100,50,.06)}
+.rel-pa{border-color:rgba(180,140,60,.4);color:#ca6;background:rgba(180,140,60,.06)}
+.rel-hae{border-color:rgba(160,80,160,.4);color:#b8b;background:rgba(160,80,160,.06)}
+.rel-wonjin{border-color:rgba(200,60,100,.4);color:#e77;background:rgba(200,60,100,.06)}
+.rel-gyeokgak{border-color:rgba(120,120,180,.4);color:#99b;background:rgba(120,120,180,.06)}
+.rel-gawonjin{border-color:rgba(180,100,60,.5);color:#c84;background:rgba(180,100,60,.08)}
+
+/* 대운 */
+.daeun-mini{overflow-x:auto;padding-bottom:4px;scrollbar-width:thin;direction:rtl}
+.daeun-mini::-webkit-scrollbar{height:4px}
+.daeun-mini::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:2px}
+.daeun-row{display:flex;gap:4px;min-width:max-content;direction:ltr}
+.du-card{min-width:54px;background:var(--card2);border:1px solid var(--bdr);border-radius:6px;padding:4px;text-align:center;flex-shrink:0}
+.du-card.current{border-color:var(--gold);box-shadow:0 0 6px rgba(201,168,76,.15)}
+.du-card.gongmang{border-style:dashed;opacity:.75}
+.du-age{font-size:8px;color:var(--td)}
+.du-hanja{font-family:'Noto Serif KR',serif;font-weight:700;margin:2px 0}
+.du-ss{font-size:8px;color:var(--ts)}
+
+footer{text-align:center;margin-top:32px;padding-top:16px;border-top:1px solid var(--bdr)}
+footer p{font-size:10px;color:var(--td);line-height:1.8}
+footer .fb{font-family:'Noto Serif KR',serif;color:var(--gold-d);font-size:11px}
+
+@media(max-width:768px){
+  .compare-grid{flex-direction:column}
+  .compare-col{min-width:100%}
+  .inp-area{flex-direction:column}
+  .quick-row{min-width:100%}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="brand">별 땅 역 학 연 구 소</div>
+  <h1>四柱 比較</h1>
+  <p class="sub">인물을 추가하면 아래에 나란히 비교됩니다 (최대 4명)</p>
+  <a class="nav-link" href="index.html">← 만세력으로 돌아가기</a>
+</header>
+
+<!-- 하나의 입력 영역 -->
+<div class="inp-area">
+  <div class="quick-row">
+    <input class="quick-inp" id="quickInput" placeholder="예: 1990 6 15 12시 남 홍길동   /   빠른 입력 후 Enter" onkeydown="if(event.key==='Enter')addFromQuick()">
+    <button class="inp-btn" onclick="addFromQuick()">추가</button>
+    <button class="inp-btn secondary" onclick="openDbPop()">DB 검색</button>
+  </div>
+  <span class="inp-count" id="slotCount">0/4명</span>
+  <button class="inp-btn clear" onclick="clearAll()" id="clearBtn" style="display:none">전체 삭제</button>
+</div>
+
+<!-- 비교 그리드 -->
+<div class="compare-grid" id="compareGrid">
+  <div class="empty-msg">위에서 인물을 추가하면 여기에 사주가 나란히 표시됩니다.<br>빠른 입력 또는 DB 검색으로 추가하세요.</div>
+</div>
+
+<!-- DB Popup -->
+<div class="db-popup" id="dbPopup">
+  <div class="db-modal">
+    <h3>人物 DB에서 추가</h3>
+    <input class="db-search-inp" id="dbPopSearch" placeholder="이름/키워드 검색" oninput="dbPopRender()">
+    <div class="db-modal-list" id="dbPopList"></div>
+    <div class="db-modal-close"><button onclick="closeDbPop()">닫기</button></div>
+  </div>
+</div>
+
+<footer><p class="fb">별땅역학연구소</p><p>사주 비교 도구 · 최대 4명 동시 비교</p></footer>
+</div>
+
+<script>
+// === Constants ===
+const SH='甲乙丙丁戊己庚辛壬癸'.split(''),Sh='갑을병정무기경신임계'.split('');
+const BH='子丑寅卯辰巳午未申酉戌亥'.split(''),Bh='자축인묘진사오미신유술해'.split('');
+const SE=[0,0,1,1,2,2,3,3,4,4],BE=[4,2,0,0,2,1,1,2,3,3,2,4];
+const EN=['木','火','土','金','水'],EC=['wood','fire','earth','metal','water'];
+const TCN=['장생','목욕','관대','건록','제왕','쇠','병','사','묘','절','태','양'];
+const TCB=[11,6,2,9,2,9,5,0,8,3];
+const SSN=['비견','겁재','식신','상관','편재','정재','편관','정관','편인','정인'];
+const JJ=[[9,null,8],[5,7,9],[0,2,4],[1,null,0],[4,9,1],[2,6,4],[3,5,2],[5,1,3],[6,8,4],[7,null,6],[4,3,7],[8,0,4]];
+const SINSAL12_NAMES=['겁살','재살','천살','지살','도화살','월살','망신살','장성살','반안살','역마살','육해살','화개살'];
+const SINSAL12_START=[11,5,2,8];
+function samGYear(b){const g=[[2,6,10],[8,0,4],[5,9,1],[11,3,7]];for(let i=0;i<4;i++)if(g[i].includes(b))return i;return 0;}
+function get12Sinsal(yb,tb){const grp=samGYear(yb),start=SINSAL12_START[grp];return SINSAL12_NAMES[((tb-start)%12+12)%12];}
+const CHEONUL=[[1,7],[0,8],[11,9],[11,9],[1,7],[0,8],[1,7],[2,6],[3,5],[3,5]];
+const MUNCHANG=[5,6,8,8,9,9,11,0,2,3];const HAKDANG=[11,6,2,9,8,9,5,0,8,3];const YANGIN=[3,2,6,5,6,5,9,8,0,11];
+function getSI(s,b){return((6*s-5*b)%60+60)%60;}
+const GOEGANG=new Set([getSI(6,4),getSI(6,10),getSI(8,4),getSI(4,10)]);
+const NACHAE=new Set([getSI(0,0),getSI(5,3),getSI(6,6),getSI(9,9),getSI(3,3)]);
+const GEUMSHIN=new Set([getSI(1,1),getSI(5,5),getSI(9,9)]);
+
+// 합충형파해
+const YUKHAP_PAIRS=[[0,1],[2,11],[3,10],[4,9],[5,8],[6,7]];
+function isYukhap(a,b){for(const p of YUKHAP_PAIRS)if((p[0]===a&&p[1]===b)||(p[0]===b&&p[1]===a))return BH[a]+BH[b];return null;}
+const SAMHAP_GROUPS=[[2,6,10,'火'],[8,0,4,'水'],[5,9,1,'金'],[11,3,7,'木']];
+function isSamhap(a,b){for(const g of SAMHAP_GROUPS)if(g.includes(a)&&g.includes(b))return g[3];return null;}
+const BANGHAP_GROUPS=[[2,3,4,'東方木'],[5,6,7,'南方火'],[8,9,10,'西方金'],[11,0,1,'北方水']];
+function isBanghap(a,b){for(const g of BANGHAP_GROUPS)if(g.includes(a)&&g.includes(b))return g[3];return null;}
+function isChung2(a,b){return(a-b+12)%12===6?BH[a]+BH[b]:null;}
+function isHyung(a,b){const HS=[{set:[2,5,8]},{set:[1,10,7]}];const HP=[[0,3]];const SH2=[4,6,9,11];for(const h of HS)if(h.set.includes(a)&&h.set.includes(b)&&a!==b)return'형';for(const p of HP)if((p[0]===a&&p[1]===b)||(p[0]===b&&p[1]===a))return'형';if(a===b&&SH2.includes(a))return'자형';return null;}
+function isPa(a,b){const P=[[0,9],[1,4],[2,11],[3,6],[5,8],[7,10]];for(const p of P)if((p[0]===a&&p[1]===b)||(p[0]===b&&p[1]===a))return BH[a]+BH[b];return null;}
+function isHae(a,b){const H=[[0,7],[1,6],[2,5],[3,4],[8,11],[9,10]];for(const p of H)if((p[0]===a&&p[1]===b)||(p[0]===b&&p[1]===a))return BH[a]+BH[b];return null;}
+function isWonjin(a,b){const W=[[0,7],[1,6],[2,9],[3,8],[4,11],[5,10]];for(const p of W)if((p[0]===a&&p[1]===b)||(p[0]===b&&p[1]===a))return BH[a]+BH[b];return null;}
+function isGyeokgak(a,b){const d=Math.min((a-b+12)%12,(b-a+12)%12);return d===2?BH[a]+BH[b]:null;}
+function isGawonjin(a,b){const G=[[6,11],[7,2],[8,1],[9,4],[10,3],[0,5]];for(const p of G)if((p[0]===a&&p[1]===b)||(p[0]===b&&p[1]===a))return BH[a]+BH[b];return null;}
+function isGanhap(a,b){const G=[[0,5,'土'],[1,6,'金'],[2,7,'水'],[3,8,'木'],[4,9,'火']];for(const p of G)if((p[0]===a&&p[1]===b)||(p[0]===b&&p[1]===a))return SH[a]+SH[b];return null;}
+function calcRelations(pillars){
+  const names=['시','일','월','연'];let rels=[];
+  for(let i=0;i<pillars.length;i++){if(!pillars[i])continue;for(let j=i+1;j<pillars.length;j++){if(!pillars[j])continue;
+    const a=pillars[i],b=pillars[j],pair=names[i]+names[j];const ba=a.b,bb=b.b;
+    const gh=isGanhap(a.s,b.s);if(gh)rels.push({cls:'rel-ganhap',text:gh,pair,label:'천간합'});
+    const yh=isYukhap(ba,bb);if(yh)rels.push({cls:'rel-hap',text:BH[ba]+BH[bb],pair,label:'육합'});
+    const sh=isSamhap(ba,bb);if(sh)rels.push({cls:'rel-samhap-'+sh,text:BH[ba]+BH[bb],pair,label:'삼합'});
+    const bh=isBanghap(ba,bb);if(bh&&!yh&&!sh){const be=bh.includes('木')?'木':bh.includes('火')?'火':bh.includes('金')?'金':'水';rels.push({cls:'rel-samhap-'+be,text:BH[ba]+BH[bb],pair,label:'방합'});}
+    const ch=isChung2(ba,bb);if(ch)rels.push({cls:'rel-chung',text:ch,pair,label:'충'});
+    const hy=isHyung(ba,bb);if(hy)rels.push({cls:'rel-hyung',text:BH[ba]+BH[bb],pair,label:'형'});
+    const pa=isPa(ba,bb);if(pa)rels.push({cls:'rel-pa',text:pa,pair,label:'파'});
+    const hae=isHae(ba,bb);if(hae)rels.push({cls:'rel-hae',text:hae,pair,label:'해'});
+    const wj=isWonjin(ba,bb);if(wj)rels.push({cls:'rel-wonjin',text:wj,pair,label:'원진'});
+    const gk=isGyeokgak(ba,bb);if(gk)rels.push({cls:'rel-gyeokgak',text:gk,pair,label:'격각'});
+    const gw=isGawonjin(ba,bb);if(gw)rels.push({cls:'rel-gawonjin',text:gw,pair,label:'가원진'});
+  }}return rels;
+}
+
+// === Astronomy ===
+function getJDN(y,m,d){let Y=y,M=m;if(M<=2){Y--;M+=12}const A=Math.floor(Y/100),B=2-A+Math.floor(A/4);return Math.floor(365.25*(Y+4716))+Math.floor(30.6001*(M+1))+d+B-1524;}
+function sunLon(jd){const T=(jd-2451545)/36525;let L=280.46646+36000.76983*T+.0003032*T*T;L=((L%360)+360)%360;let M=357.52911+35999.05029*T-.0001537*T*T;M=((M%360)+360)%360;const Mr=M*Math.PI/180;const C=(1.914602-.004817*T-.000014*T*T)*Math.sin(Mr)+(.019993-.000101*T)*Math.sin(2*Mr)+.000289*Math.sin(3*Mr);let s=L+C;const o=125.04-1934.136*T;s=s-.00569-.00478*Math.sin(o*Math.PI/180);return((s%360)+360)%360;}
+function findST(yr,lon){let e=getJDN(yr,3,20)+.5+lon/.9856;for(let i=0;i<50;i++){const c=sunLon(e);let d=lon-c;if(d>180)d-=360;if(d<-180)d+=360;if(Math.abs(d)<.00001)break;e+=d/.9856;}return e;}
+const JL=[315,345,15,45,75,105,135,165,195,225,255,285];
+const KST=9/24;
+function jdLD(jd){return Math.floor(jd+KST+.5);}
+
+// Lunar
+function nmJD(k){const T=k/1236.85,T2=T*T,T3=T2*T,T4=T3*T;let J=2451550.09766+29.530588861*k+.00015437*T2-.00000015*T3+.00000000073*T4;const E=1-.002516*T-.0000074*T2;const S=(2.5534+29.10535670*k-.0000014*T2-.00000011*T3)*Math.PI/180;const M=(201.5643+385.81693528*k+.0107582*T2+.00001238*T3-.000000058*T4)*Math.PI/180;const F=(160.7108+390.67050284*k-.0016118*T2-.00000227*T3+.000000011*T4)*Math.PI/180;const O=(124.7746-1.56375588*k+.0020672*T2+.00000215*T3)*Math.PI/180;J+=-.40720*Math.sin(M)+.17241*E*Math.sin(S)+.01608*Math.sin(2*M)+.01039*Math.sin(2*F)+.00739*E*Math.sin(M-S)-.00514*E*Math.sin(M+S)+.00208*E*E*Math.sin(2*S)-.00111*Math.sin(M-2*F)-.00057*Math.sin(M+2*F)+.00056*E*Math.sin(2*M+S)-.00042*Math.sin(3*M)+.00042*E*Math.sin(S+2*F)+.00038*E*Math.sin(S-2*F)-.00024*E*Math.sin(2*M-S)-.00017*Math.sin(O);return J;}
+function buildLC(ly){const w1=findST(ly-1,270),w2=findST(ly,270),w1d=jdLD(w1),w2d=jdLD(w2);let k0=Math.floor((w1-2451550.1)/29.530588861)-2,moons=[];for(let i=0;i<50;i++){const j=nmJD(k0+i);if(j>w2+40)break;if(j>=w1-40)moons.push(j);}const md=moons.map(j=>jdLD(j));let m1=-1,m2=-1;for(let i=md.length-1;i>=0;i--){if(md[i]<=w1d){m1=i;break;}}for(let i=md.length-1;i>=0;i--){if(md[i]<=w2d){m2=i;break;}}if(m1<0||m2<0||m2<=m1)return null;const nm=m2-m1,hasL=nm===13;let zq=[];for(let y=ly-2;y<=ly+1;y++)for(let q=0;q<12;q++)zq.push(jdLD(findST(y,q*30)));zq=[...new Set(zq)].sort((a,b)=>a-b);function hasZQ(s,e){for(const d of zq)if(d>=s&&d<=e)return true;return false;}let li=-1;if(hasL)for(let i=m1+1;i<m2;i++){if(!hasZQ(md[i],md[i+1]-1)){li=i-m1;break;}}let ms=[],mn=11;for(let i=0;i<=nm;i++){const idx=m1+i,il=hasL&&i===li,sd=md[idx],nd=idx+1<md.length?md[idx+1]-md[idx]:30;ms.push({mn,il,sd,nd});if(!il)mn=mn%12+1;}return ms;}
+function l2s(ly,lm,ld,il){const ms=buildLC(ly);if(!ms)return null;let t=null;for(const m of ms)if(m.mn===lm&&m.il===il){t=m;break;}if(!t||ld<1||ld>t.nd)return null;return jdn2d(t.sd+ld-1);}
+function jdn2d(j){const a=Math.floor((j-1867216.25)/36524.25),A=j+1+a-Math.floor(a/4),B=A+1524,C=Math.floor((B-122.1)/365.25),D=Math.floor(365.25*C),E=Math.floor((B-D)/30.6001);return{d:B-D-Math.floor(30.6001*E),m:E<14?E-1:E-13,y:(E<14?E-1:E-13)>2?C-4716:C-4715};}
+function s2l(sy,sm,sd){const jd=getJDN(sy,sm,sd);for(let ly=sy-1;ly<=sy+1;ly++){const ms=buildLC(ly);if(!ms)continue;for(const m of ms)if(jd>=m.sd&&jd<m.sd+m.nd)return{y:ly,m:m.mn,d:jd-m.sd+1,leap:m.il};}return null;}
+
+// === Saju Calc ===
+function dayP(y,m,d){const j=getJDN(y,m,d),si=((j%60)+49)%60;return{s:si%10,b:si%12,si};}
+function birthJD_UT(y,m,d,h){return h>=0?getJDN(y,m,d)+(h-12)/24-9/24+0.5/24:getJDN(y,m,d)+.5;}
+function yearP(y,m,d,h,ij){const c=birthJD_UT(y,m,d,h);let ey=y;if(c<ij)ey--;return{s:((ey-4)%10+10)%10,b:((ey-4)%12+12)%12};}
+function monthP(y,m,d,h,ys){const c=birthJD_UT(y,m,d,h);let jds=[];for(let yr=y-1;yr<=y+1;yr++)for(let i=0;i<12;i++){let cy=yr;if(JL[i]>=315)cy=yr-1;jds.push({jd:findST(cy,JL[i]),mi:i});}jds.sort((a,b)=>a.jd-b.jd);let cm=11;for(let i=jds.length-1;i>=0;i--)if(c>=jds[i].jd){cm=jds[i].mi;break;}return{s:((ys%5)*2+2+cm)%10,b:(cm+2)%12};}
+function hourP(h,ds){if(h<0)return null;let t=h*60+30;if(t>=1440)t-=1440;let bi;if(t<120)bi=0;else if(t<240)bi=1;else if(t<360)bi=2;else if(t<480)bi=3;else if(t<600)bi=4;else if(t<720)bi=5;else if(t<840)bi=6;else if(t<960)bi=7;else if(t<1080)bi=8;else if(t<1200)bi=9;else if(t<1320)bi=10;else bi=11;let eds=ds;if(h>=23)eds=(ds+1)%10;return{s:(eds*2+bi)%10,b:bi};}
+function tc(si,bi){const sb=TCB[si];return si%2===0?(bi-sb+12)%12:(sb-bi+12)%12;}
+function ss(ds,ts){const r=(SE[ts]-SE[ds]+5)%5;return SSN[r*2+((ds%2)===(ts%2)?0:1)];}
+function gm(si){const xs=Math.floor(si/10)*10,sb=xs%12;return[(sb+10)%12,(sb+11)%12];}
+function ecls(s){return'c-'+EC[SE[s]];}
+function eclsB(b){return'c-'+EC[BE[b]];}
+function calcDaeun(sY,sM,sD,h,gender,yearStem,monthSI){
+  const isYang=yearStem%2===0;const fwd=(gender==='male'&&isYang)||(gender==='female'&&!isYang);
+  const bJD=birthJD_UT(sY,sM,sD,h);let jgs=[];
+  for(let yr=sY-1;yr<=sY+1;yr++)for(let i=0;i<12;i++){let cy=yr;if(JL[i]>=315)cy=yr-1;jgs.push(findST(cy,JL[i]));}jgs.sort((a,b)=>a-b);
+  let days;if(fwd){for(const j of jgs)if(j>bJD){days=j-bJD;break;}}else{for(let i=jgs.length-1;i>=0;i--)if(jgs[i]<bJD){days=bJD-jgs[i];break;}}
+  const daeunsu=Math.round((days||0)/3);let result=[];
+  for(let i=1;i<=13;i++){const offset=fwd?i:-i;const newSI=((monthSI+offset)%60+60)%60;result.push({s:newSI%10,b:newSI%12,age:daeunsu+(i-1)*10,si:newSI});}
+  return{daeunsu,fwd,pillars:result};
+}
+function pillarSinsal(dayS,dayB,daySI,branch,pillarIdx,yearB,yearS){
+  let tags=[];if(branch<0)return tags;
+  if(pillarIdx===1){if(GOEGANG.has(daySI))tags.push('괴강');if(NACHAE.has(daySI))tags.push('나체도화');if(GEUMSHIN.has(daySI))tags.push('금신');}
+  if(CHEONUL[dayS].includes(branch))tags.push('천을귀인');if(MUNCHANG[dayS]===branch)tags.push('문창');if(HAKDANG[dayS]===branch)tags.push('학당');if(YANGIN[dayS]===branch)tags.push('양인');
+  if(pillarIdx!==1){const gmp=gm(daySI);if(gmp[0]===branch||gmp[1]===branch)tags.push('공망(일)');}
+  if(pillarIdx!==3){const ySI=getSI(yearS,yearB);const ygm=gm(ySI);if(ygm[0]===branch||ygm[1]===branch)tags.push('공망(년)');}
+  const sinName=get12Sinsal(yearB,branch);const highlight=['역마살','도화살','육해살','화개살','겁살','재살','장성살','망신살','반안살','천살','지살'];
+  if(highlight.includes(sinName))tags.push(sinName.replace('살',''));return tags;
+}
+
+// === IndexedDB ===
+let idb=null;const IDB_NAME='byulddang_personDB',IDB_VER=1,IDB_STORE='persons';
+function idbOpen(){return new Promise((res,rej)=>{const rq=indexedDB.open(IDB_NAME,IDB_VER);rq.onupgradeneeded=e=>{const db=e.target.result;if(!db.objectStoreNames.contains(IDB_STORE)){db.createObjectStore(IDB_STORE,{keyPath:'id',autoIncrement:true}).createIndex('name','name',{unique:false});}};rq.onsuccess=e=>{idb=e.target.result;res(idb);};rq.onerror=e=>rej(e.target.error);});}
+function idbAll(){return new Promise((res,rej)=>{const tx=idb.transaction(IDB_STORE,'readonly'),st=tx.objectStore(IDB_STORE),rq=st.getAll();rq.onsuccess=()=>res(rq.result);rq.onerror=e=>rej(e.target.error);});}
+
+// === State ===
+const MAX=4;
+let people=[]; // [{id, name, year, month, day, hour, gender, calType, result}]
+let seq=0;
+
+function addPerson(data){
+  if(people.length>=MAX){alert('최대 4명까지 비교할 수 있습니다.');return;}
+  const id=++seq;
+  const p={...data,id,result:null};
+  people.push(p);
+  calcPerson(id);
+}
+
+function removePerson(id){
+  people=people.filter(p=>p.id!==id);
+  updateUI();
+}
+
+function clearAll(){
+  people=[];seq=0;
+  updateUI();
+}
+
+function calcPerson(id){
+  const p=people.find(x=>x.id===id);if(!p)return;
+  let sY=p.year,sM=p.month,sD=p.day,h=p.hour!=null?p.hour:-1,conv='';
+  if(p.calType==='lunar'){
+    const r=l2s(p.year,p.month,p.day,false);
+    if(!r){alert('음력 변환 실패');return;}
+    sY=r.y;sM=r.m;sD=r.d;conv=`음력 ${p.year}.${p.month}.${p.day} → 양력 ${sY}.${sM}.${sD}`;
+  }
+  const ij=findST(sY-1,315);
+  const yP=yearP(sY,sM,sD,h,ij),mP=monthP(sY,sM,sD,h,yP.s),dP=dayP(sY,sM,sD),hP=hourP(h,dP.s);
+  const mSI=getSI(mP.s,mP.b);const daeun=calcDaeun(sY,sM,sD,h,p.gender||'male',yP.s,mSI);
+  p.result={yP,mP,dP,hP,sY,sM,sD,h,daeun,conv};
+  updateUI();
+}
+
+function updateUI(){
+  document.getElementById('slotCount').textContent=people.length+'/'+MAX+'명';
+  document.getElementById('clearBtn').style.display=people.length>0?'':'none';
+  renderGrid();
+}
+
+// === 빠른 입력 파서 ===
+function addFromQuick(){
+  const raw=document.getElementById('quickInput').value.trim();if(!raw)return;
+  let text=raw,calType='solar',gender='male',hour=-1;
+  if(/음력/.test(text)){calType='lunar';text=text.replace(/음력/g,'');}else text=text.replace(/양력/g,'');
+  let isPM=false,isAM=false;
+  if(/오후|PM|pm/.test(text)){isPM=true;text=text.replace(/오후|PM|pm/g,'');}
+  if(/오전|AM|am/.test(text)){isAM=true;text=text.replace(/오전|AM|am/g,'');}
+  if(/남자|남성/.test(text)){gender='male';text=text.replace(/남자|남성/g,'');}
+  else if(/여자|여성/.test(text)){gender='female';text=text.replace(/여자|여성/g,'');}
+  else if(/(?<![가-힣])남(?![가-힣])/.test(text)){gender='male';text=text.replace(/(?<![가-힣])남(?![가-힣])/g,'');}
+  else if(/(?<![가-힣])여(?![가-힣])/.test(text)){gender='female';text=text.replace(/(?<![가-힣])여(?![가-힣])/g,'');}
+  text=text.replace(/년|월|일|시|분|세/g,' ').replace(/[.\-\/\:,]/g,' ');
+  let name='';const nameMatch=text.match(/[가-힣a-zA-Z]{2,}/g);
+  if(nameMatch){name=nameMatch.join(' ');nameMatch.forEach(n=>{text=text.replace(n,'');});}
+  const nums=text.match(/\d+/g);
+  if(!nums||nums.length<3){document.getElementById('quickInput').style.borderColor='#ef5350';setTimeout(()=>{document.getElementById('quickInput').style.borderColor='';},1200);return;}
+  const year=parseInt(nums[0]),month=parseInt(nums[1]),day=parseInt(nums[2]);
+  if(nums.length>=4){hour=parseInt(nums[3]);if(isPM&&hour<12)hour+=12;if(isAM&&hour===12)hour=0;}
+  addPerson({name,year,month,day,hour,gender,calType});
+  document.getElementById('quickInput').value='';
+  document.getElementById('quickInput').focus();
+}
+
+// === DB Popup ===
+function openDbPop(){document.getElementById('dbPopup').classList.add('show');document.getElementById('dbPopSearch').value='';dbPopRender();document.getElementById('dbPopSearch').focus();}
+function closeDbPop(){document.getElementById('dbPopup').classList.remove('show');}
+async function dbPopRender(){
+  if(!idb)return;const all=await idbAll();
+  const q=(document.getElementById('dbPopSearch')?.value||'').toLowerCase();
+  let filtered=all;
+  if(q){filtered=all.filter(e=>{const nm=(e.name||'').toLowerCase();const kw=(e.keyword||'').toLowerCase();const jb=(e.job||'').toLowerCase();return nm.includes(q)||kw.includes(q)||jb.includes(q);});}
+  const list=document.getElementById('dbPopList');
+  if(!filtered.length){list.innerHTML='<div style="padding:20px;text-align:center;color:var(--td)">결과 없음</div>';return;}
+  list.innerHTML=filtered.slice(0,100).map(e=>{
+    const c=e.chart||{};const saju=c.ds!==undefined?`${SH[c.ds]}${BH[c.db]}`:'';
+    const cal=(e.calType==='lunar'||e.cal==='lunar')?'음':'양';
+    const gd=e.gender==='M'||e.gender==='남'?'남':'여';
+    return `<div class="db-modal-item" onclick="dbPopSelect(${e.id})">
+      <span class="nm">${e.name||''} <span style="color:var(--gold-d)">${saju}</span></span>
+      <span class="info">${cal} ${e.year}.${e.month}.${e.day} ${gd}</span>
+    </div>`;
+  }).join('');
+}
+async function dbPopSelect(entryId){
+  const all=await idbAll();const e=all.find(x=>x.id===entryId);if(!e)return;
+  addPerson({
+    name:e.name||'',year:e.year,month:e.month,day:e.day,
+    hour:e.hourUnknown?-1:(e.hour!=null?e.hour:-1),
+    gender:(e.gender==='F'||e.gender==='여'||e.gender==='female')?'female':'male',
+    calType:(e.calType==='lunar'||e.cal==='lunar')?'lunar':'solar'
+  });
+  if(people.length>=MAX)closeDbPop();
+}
+
+// === Render Grid ===
+function renderGrid(){
+  const grid=document.getElementById('compareGrid');
+  if(!people.length||!people.some(p=>p.result)){
+    grid.innerHTML='<div class="empty-msg">위에서 인물을 추가하면 여기에 사주가 나란히 표시됩니다.<br>빠른 입력 또는 DB 검색으로 추가하세요.</div>';return;
+  }
+  const active=people.filter(p=>p.result);
+  const curYear=new Date().getFullYear();
+  const n=active.length;
+  const hSize=n<=2?30:n===3?26:22;
+  const nameSize=n<=2?18:15;
+  const duSize=n<=2?20:16;
+  let h='';
+  active.forEach((p,idx)=>{
+    const R=p.result;const{yP,mP,dP,hP,sY,sM,sD,daeun}=R;
+    const manAge=curYear-sY;const korAge=curYear-sY+1;
+    const dow=['일','월','화','수','목','금','토'][new Date(sY,sM-1,sD).getDay()];
+    const lunar=s2l(sY,sM,sD);const lunarStr=lunar?`음 ${lunar.y}.${lunar.leap?'윤':''}${lunar.m}.${lunar.d}`:'';
+    const ps=[{l:'시주',d:hP},{l:'일주',d:dP},{l:'월주',d:mP},{l:'연주',d:yP}];
+
+    h+=`<div class="compare-col">`;
+    h+=`<button class="col-close" onclick="removePerson(${p.id})" title="삭제">✕</button>`;
+    h+=`<div class="col-header">
+      <div class="name" style="font-size:${nameSize}px">${p.name||'인물 '+(idx+1)}</div>
+      <div class="gender">${p.gender==='male'?'乾命 남':'坤命 여'} · 만${manAge}세(${korAge}세)</div>
+      <div class="dt">${sY}.${sM}.${sD}(${dow}) ${p.hour>=0?p.hour+'시':'시간미상'}</div>
+      ${lunarStr?`<div class="dt">${lunarStr}</div>`:''}
+      ${R.conv?`<div class="dt" style="color:var(--gold-d)">${R.conv}</div>`:''}
+    </div>`;
+
+    // Saju Table
+    let t='<table class="saju-tbl"><tr><th style="width:44px"></th><th>시주</th><th>일주</th><th>월주</th><th>연주</th></tr>';
+    t+='<tr><td class="lbl">십신</td>';
+    for(let i=0;i<4;i++){if(!ps[i].d)t+='<td>—</td>';else if(i===1)t+='<td class="ss ilgan">일간</td>';else t+='<td class="ss">'+ss(dP.s,ps[i].d.s)+'</td>';}t+='</tr>';
+    t+='<tr><td class="lbl">천간</td>';
+    for(let i=0;i<4;i++){if(!ps[i].d)t+=`<td class="hanja" style="color:var(--td);font-size:${hSize}px">？</td>`;else t+=`<td class="hanja ${ecls(ps[i].d.s)}" style="font-size:${hSize}px">${SH[ps[i].d.s]}</td>`;}t+='</tr>';
+    t+='<tr><td class="lbl">지지</td>';
+    for(let i=0;i<4;i++){if(!ps[i].d)t+=`<td class="hanja" style="color:var(--td);font-size:${hSize}px">？</td>`;else t+=`<td class="hanja ${eclsB(ps[i].d.b)}" style="font-size:${hSize}px">${BH[ps[i].d.b]}</td>`;}t+='</tr>';
+    t+='<tr><td class="lbl">십신</td>';
+    for(let i=0;i<4;i++){if(!ps[i].d)t+='<td>—</td>';else t+='<td class="ss">'+ss(dP.s,JJ[ps[i].d.b][0])+'</td>';}t+='</tr>';
+    t+='<tr class="sep"><td colspan="5"></td></tr>';
+    t+='<tr class="jj-row"><td class="lbl" style="font-size:8px">장간</td>';
+    for(let i=0;i<4;i++){if(!ps[i].d){t+='<td>—</td>';continue;}const br=ps[i].d.b;const stems=[JJ[br][2],JJ[br][1],JJ[br][0]].filter(x=>x!==null&&x!==undefined);t+='<td style="font-size:10px">'+stems.map(x=>`<span class="${ecls(x)}">${Sh[x]}</span>`).join(',')+'</td>';}t+='</tr>';
+    t+='<tr class="sep"><td colspan="5"></td></tr>';
+    t+='<tr><td class="lbl">운성</td>';
+    for(let i=0;i<4;i++){if(!ps[i].d)t+='<td>—</td>';else t+=`<td class="ss">${TCN[tc(dP.s,ps[i].d.b)]}</td>`;}t+='</tr>';
+    t+='<tr><td class="lbl">지향</td>';
+    for(let i=0;i<4;i++){if(!ps[i].d)t+='<td>—</td>';else{const psi=getSI(ps[i].d.s,ps[i].d.b);const pgm=gm(psi);const j0=(pgm[0]+6)%12,j1=(pgm[1]+6)%12;t+=`<td class="ss">${Bh[j0]}${Bh[j1]}</td>`;}}t+='</tr>';
+    t+='<tr><td class="lbl">신살</td>';
+    for(let i=0;i<4;i++){if(!ps[i].d){t+='<td>—</td>';continue;}const tags=pillarSinsal(dP.s,dP.b,dP.si,ps[i].d.b,i,yP.b,yP.s);t+='<td class="sinsal-cell">'+tags.map(x=>'<span>'+x+'</span>').join('')+'</td>';}t+='</tr>';
+    t+='</table>';h+=t;
+
+    // 오행
+    const allS=[dP.s,mP.s,yP.s],allB=[dP.b,mP.b,yP.b];if(hP){allS.push(hP.s);allB.push(hP.b);}
+    const ec=[0,0,0,0,0];allS.forEach(x=>ec[SE[x]]++);allB.forEach(x=>ec[BE[x]]++);const tot=allS.length+allB.length;
+    h+=`<div class="elem-bar">`;EC.forEach((c,i)=>{if(ec[i]>0){h+=`<div class="b-${c}" style="flex:${ec[i]}">${EN[i]}${Math.round(ec[i]/tot*100)}%</div>`;}});h+=`</div>`;
+
+    // 합충형파해
+    const relP=[hP?{s:hP.s,b:hP.b}:null,{s:dP.s,b:dP.b},{s:mP.s,b:mP.b},{s:yP.s,b:yP.b}];
+    const rels=calcRelations(relP);
+    if(rels.length){h+='<div class="sin-list">';rels.forEach(r=>{h+=`<span class="rel-tag ${r.cls}"><span class="pair">${r.text}</span>${r.label}(${r.pair})</span>`;});h+='</div>';}
+
+    // 대운
+    const dayGM=gm(dP.si);
+    h+='<div class="daeun-mini"><div class="daeun-row">';
+    for(let i=daeun.pillars.length-1;i>=0;i--){
+      const du=daeun.pillars[i];const yr=sY+du.age;const isCur=curYear>=yr&&curYear<yr+10;const isGM=dayGM[0]===du.b||dayGM[1]===du.b;
+      h+=`<div class="du-card${isCur?' current':''}${isGM?' gongmang':''}">
+        <div class="du-age">${du.age}세</div>
+        <div class="du-hanja" style="font-size:${duSize}px"><span class="${ecls(du.s)}">${SH[du.s]}</span><span class="${eclsB(du.b)}">${BH[du.b]}</span></div>
+        <div class="du-ss">${ss(dP.s,du.s)}/${ss(dP.s,JJ[du.b][0])}</div>
+        <div class="du-age">${yr}~</div>
+      </div>`;
+    }
+    h+='</div></div>';
+    h+=`</div>`;
+  });
+  grid.innerHTML=h;
+}
+
+// === Init ===
+async function init(){
+  await idbOpen();
+  const stored=localStorage.getItem('byulddang_compare');
+  if(stored){
+    try{
+      const list=JSON.parse(stored);localStorage.removeItem('byulddang_compare');
+      if(Array.isArray(list)&&list.length>=1){list.forEach(e=>addPerson(e));return;}
+    }catch(e){}
+  }
+  updateUI();
+}
+init();
+</script>
+</body>
+</html>

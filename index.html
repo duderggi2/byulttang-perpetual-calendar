@@ -245,6 +245,26 @@ footer{text-align:center;margin-top:32px;padding-top:16px;border-top:1px solid v
 footer p{font-size:10px;color:var(--td);line-height:1.8}
 footer .fb{font-family:'Noto Serif KR',serif;color:var(--gold-d);font-size:11px}
 
+/* 비교 트레이 */
+.cmp-tray{position:fixed;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(247,245,240,.98),rgba(247,245,240,.95));border-top:2px solid var(--gold);padding:10px 20px;z-index:900;display:none;box-shadow:0 -4px 20px rgba(0,0,0,.1);backdrop-filter:blur(8px)}
+.cmp-tray.show{display:block;animation:trayUp .3s ease}
+@keyframes trayUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.cmp-tray-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.cmp-tray-title{font-family:'Noto Serif KR',serif;font-size:13px;color:var(--gold-l);font-weight:700}
+.cmp-tray-actions{display:flex;gap:6px}
+.cmp-tray-go{background:linear-gradient(135deg,var(--gold-d),var(--gold));color:#fff;border:none;border-radius:6px;padding:7px 20px;font-family:'Noto Serif KR',serif;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:1px}
+.cmp-tray-go:hover{box-shadow:0 2px 10px rgba(201,168,76,.3)}
+.cmp-tray-clear{background:var(--bg);border:1px solid var(--bdr);color:var(--td);padding:7px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-family:inherit}
+.cmp-tray-list{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.cmp-chip{display:flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--gold-d);border-radius:8px;padding:6px 10px;min-width:0;white-space:nowrap;font-size:12px}
+.cmp-chip .cname{font-weight:600;color:var(--tp)}
+.cmp-chip .csaju{font-family:'Noto Serif KR',serif;color:var(--gold);font-size:13px;font-weight:700}
+.cmp-chip .cdel{color:var(--fire);cursor:pointer;padding:2px 4px;font-size:14px;opacity:.5;line-height:1}
+.cmp-chip .cdel:hover{opacity:1}
+.db-item .cmp-add{color:var(--gold);cursor:pointer;padding:2px 8px;font-size:11px;border:1px solid var(--gold-d);border-radius:4px;background:rgba(201,168,76,.08);white-space:nowrap;transition:all .15s}
+.db-item .cmp-add:hover{background:rgba(201,168,76,.2)}
+.db-item .cmp-add.added{color:var(--td);border-color:var(--bdr);background:var(--card2)}
+
 /* 빠른 입력 */
 .quick-paste{display:flex;gap:6px;margin-bottom:12px}
 .quick-input{flex:1;background:var(--bg);border:1px solid var(--bdr);border-radius:8px;color:var(--tp);font-family:inherit;font-size:13px;padding:10px 14px;outline:none;transition:border-color .2s}
@@ -260,6 +280,7 @@ footer .fb{font-family:'Noto Serif KR',serif;color:var(--gold-d);font-size:11px}
 <div class="brand">별 땅 역 학 연 구 소</div>
 <h1>四柱 萬歲曆 Pro</h1>
 <p class="sub">대운 · 세운 · 신살 · 인물DB</p>
+<a href="compare.html" style="display:inline-block;margin-top:8px;color:var(--gold);font-size:12px;text-decoration:none;border:1px solid var(--gold-d);padding:4px 14px;border-radius:6px;transition:all .2s" onmouseover="this.style.background='rgba(201,168,76,.12)'" onmouseout="this.style.background=''">사주 비교 모드 →</a>
 </header>
 
 <div class="main-split">
@@ -408,6 +429,18 @@ footer .fb{font-family:'Noto Serif KR',serif;color:var(--gold-d);font-size:11px}
 
 </div><!-- /main-right -->
 </div><!-- /main-split -->
+
+<!-- 비교 트레이 -->
+<div class="cmp-tray" id="cmpTray">
+  <div class="cmp-tray-head">
+    <span class="cmp-tray-title">비교 목록 (<span id="cmpCount">0</span>/4명)</span>
+    <div class="cmp-tray-actions">
+      <button class="cmp-tray-clear" onclick="cmpClear()">전체 해제</button>
+      <button class="cmp-tray-go" onclick="cmpGo()" id="cmpGoBtn" disabled>비교하기 →</button>
+    </div>
+  </div>
+  <div class="cmp-tray-list" id="cmpList"></div>
+</div>
 
 <footer><p class="fb">별땅역학연구소</p><p>본 만세력은 참고용입니다. 절기 경계일은 만세력과 교차 확인하세요.</p></footer>
 </div>
@@ -1696,9 +1729,11 @@ function dbRenderPage(){
     const gd=e.gender==='M'||e.gender==='남'||e.gender==='male'?'M':e.gender==='F'||e.gender==='여'||e.gender==='female'?'F':e.gender||'';
     const extra=[(e.job||''),(e.keyword||'')].filter(x=>x).join(' · ');
     const namuLink=e.namuUrl||e.wiki||(e.name?'https://namu.wiki/w/'+encodeURIComponent(e.name):'');
+    const inCmp=cmpList.some(x=>x.id===e.id);
     return `<div class="db-item" onclick="dbLoadEntry(${e.id})">
       <span class="name">${e.name||''} <span style="color:var(--gold-d)">${c.ds!==undefined?SH[c.ds]+BH[c.db]:''}</span>${extra?'<span style="color:var(--td);font-size:10px;margin-left:4px">'+extra+'</span>':''}</span>
       <span class="info">${cal} ${e.year}.${e.month}.${e.day} ${gd} · ${saju}${namuLink?'<a href="'+namuLink+'" target="_blank" onclick="event.stopPropagation()" style="color:var(--gold);margin-left:4px;font-size:10px">나무위키</a>':''}</span>
+      <span class="cmp-add${inCmp?' added':''}" onclick="event.stopPropagation();cmpToggle(${e.id})" title="비교 목록에 추가">${inCmp?'담김':'비교'}</span>
       <span class="del" onclick="event.stopPropagation();dbDelEntry(${e.id})">✕</span>
     </div>`;
   }).join('');
@@ -1967,6 +2002,68 @@ async function dbSearchAdvanced(){
   dbPage=1;
   dbRenderPage();
   document.getElementById('dbSearch').value='';
+}
+
+// === 비교 트레이 ===
+let cmpList=[]; // [{id, name, year, month, day, hour, gender, calType, chart}]
+
+async function cmpToggle(id){
+  const idx=cmpList.findIndex(x=>x.id===id);
+  if(idx>=0){
+    cmpList.splice(idx,1);
+  }else{
+    if(cmpList.length>=4){alert('최대 4명까지 비교할 수 있습니다.');return;}
+    const entry=await idbGet(id);
+    if(!entry)return;
+    cmpList.push({
+      id:entry.id, name:entry.name||'', year:entry.year, month:entry.month, day:entry.day,
+      hour:entry.hourUnknown?-1:(entry.hour!=null?entry.hour:-1),
+      gender:(entry.gender==='F'||entry.gender==='여'||entry.gender==='female')?'female':'male',
+      calType:(entry.calType==='lunar'||entry.cal==='lunar')?'lunar':'solar',
+      chart:entry.chart||null
+    });
+  }
+  cmpRender();
+  dbRenderPage(); // 목록의 '담김' 상태 갱신
+}
+
+function cmpRender(){
+  const tray=document.getElementById('cmpTray');
+  const list=document.getElementById('cmpList');
+  const cnt=document.getElementById('cmpCount');
+  const goBtn=document.getElementById('cmpGoBtn');
+  if(cmpList.length===0){tray.classList.remove('show');return;}
+  tray.classList.add('show');
+  cnt.textContent=cmpList.length;
+  goBtn.disabled=cmpList.length<2;
+  list.innerHTML=cmpList.map(e=>{
+    const c=e.chart;
+    const saju=c&&c.ds!==undefined?`${SH[c.ds]}${BH[c.db]}`:'';
+    return `<div class="cmp-chip">
+      <span class="cname">${e.name||'이름없음'}</span>
+      <span class="csaju">${saju}</span>
+      <span class="cdel" onclick="cmpRemove(${e.id})">✕</span>
+    </div>`;
+  }).join('');
+}
+
+function cmpRemove(id){
+  cmpList=cmpList.filter(x=>x.id!==id);
+  cmpRender();
+  dbRenderPage();
+}
+
+function cmpClear(){
+  cmpList=[];
+  cmpRender();
+  dbRenderPage();
+}
+
+function cmpGo(){
+  if(cmpList.length<2)return;
+  // localStorage로 데이터 전달
+  localStorage.setItem('byulddang_compare',JSON.stringify(cmpList));
+  window.open('compare.html','_blank');
 }
 
 // Init DB
