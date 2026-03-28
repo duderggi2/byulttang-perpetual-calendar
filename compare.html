@@ -401,7 +401,6 @@ function renderGrid(){
       <div class="gender">${p.gender==='male'?'乾命 남':'坤命 여'} · 만${manAge}세(${korAge}세)</div>
       <div class="dt">${sY}.${sM}.${sD}(${dow}) ${p.hour>=0?p.hour+'시':'시간미상'}</div>
       ${lunarStr?`<div class="dt">${lunarStr}</div>`:''}
-      ${R.conv?`<div class="dt" style="color:var(--gold-d)">${R.conv}</div>`:''}
     </div>`;
 
     // Saju Table
