@@ -6,7 +6,7 @@
 <title>별땅역학연구소 — 사주 만세력 Pro</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700;900&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#ffffff;--card:#f7f5f0;--card2:#eeece5;--gold:#9a7a2e;--gold-l:#7a6020;--gold-d:#b8952e;--tp:#1a1a18;--ts:#5a5850;--td:#9a9890;--wood:#2e7d4f;--fire:#c03030;--earth:#a07e28;--metal:#8a8a9a;--water:#1a3d7a;--bdr:rgba(100,80,40,.15);--r:10px}
+:root{--bg:#faf8f3;--card:#ffffff;--card2:#f5f2eb;--gold:#9a7a2e;--gold-l:#7a6020;--gold-d:#b8952e;--tp:#1a1a18;--ts:#5a5850;--td:#9a9890;--wood:#2e7d4f;--fire:#c03030;--earth:#a07e28;--metal:#8a8a9a;--water:#1a3d7a;--bdr:rgba(100,80,40,.12);--r:10px}
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:var(--bg);color:var(--tp);font-family:'Noto Sans KR',sans-serif;min-height:100vh;font-size:14px}
 .wrap{max-width:1600px;margin:0 auto;padding:24px 16px}
@@ -272,6 +272,46 @@ footer .fb{font-family:'Noto Serif KR',serif;color:var(--gold-d);font-size:11px}
 .quick-input::placeholder{color:var(--td);font-size:12px}
 .quick-btn{background:rgba(201,168,76,.12);border:1px solid var(--gold-d);color:var(--gold);padding:10px 20px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;white-space:nowrap;transition:all .2s}
 .quick-btn:hover{background:rgba(201,168,76,.2);border-color:var(--gold)}
+
+/* 인물 웹 검색 엔진 */
+.search-engine{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:16px;margin-bottom:16px}
+.search-engine h3{font-family:'Noto Serif KR',serif;font-size:14px;color:var(--gold-l);margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--bdr)}
+.search-engine h3 .badge{font-size:9px;background:rgba(201,168,76,.15);color:var(--gold);padding:2px 8px;border-radius:10px;font-weight:400;margin-left:8px;vertical-align:middle;letter-spacing:0}
+.se-bar{display:flex;gap:6px;margin-bottom:10px}
+.se-bar input{flex:1;background:var(--bg);border:1px solid var(--bdr);border-radius:8px;color:var(--tp);font-family:inherit;font-size:13px;padding:9px 14px;outline:none;transition:border-color .2s}
+.se-bar input:focus{border-color:var(--gold)}
+.se-bar input::placeholder{color:var(--td);font-size:12px}
+.se-bar button{background:linear-gradient(135deg,var(--gold-d),var(--gold));color:#fff;border:none;border-radius:8px;padding:9px 18px;font-family:'Noto Serif KR',serif;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:1px;white-space:nowrap}
+.se-bar button:hover{box-shadow:0 2px 10px rgba(201,168,76,.3)}
+.se-links{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.se-links a{font-size:11px;color:var(--gold);text-decoration:none;border:1px solid var(--bdr);padding:4px 10px;border-radius:5px;transition:all .15s;cursor:pointer}
+.se-links a:hover{background:rgba(201,168,76,.1);border-color:var(--gold)}
+.se-status{font-size:11px;color:var(--td);text-align:center;padding:8px 0}
+.se-results{max-height:400px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--bdr) transparent}
+.se-results::-webkit-scrollbar{width:6px}
+.se-results::-webkit-scrollbar-track{background:transparent}
+.se-results::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:3px}
+.se-item{display:flex;flex-direction:column;padding:10px 12px;border-bottom:1px solid rgba(0,0,0,.06);cursor:pointer;transition:background .2s;border-radius:6px;margin-bottom:2px}
+.se-item:hover{background:rgba(201,168,76,.06)}
+.se-item-head{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.se-item-name{font-weight:600;color:var(--tp);font-size:13px}
+.se-item-badge{font-size:9px;padding:2px 6px;border-radius:8px;font-weight:600;letter-spacing:.5px}
+.se-item-badge.db{background:rgba(46,125,79,.12);color:var(--wood)}
+.se-item-badge.wiki{background:rgba(26,61,122,.12);color:var(--water)}
+.se-item-badge.namu{background:rgba(160,126,40,.12);color:var(--earth)}
+.se-item-info{font-size:11px;color:var(--ts);line-height:1.5}
+.se-item-info .birth{color:var(--gold);font-weight:500}
+.se-item-info .desc{color:var(--td)}
+.se-item-actions{display:flex;gap:6px;margin-top:6px}
+.se-item-actions button{font-size:10px;padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;border:1px solid var(--bdr);background:var(--bg);color:var(--ts);transition:all .15s}
+.se-item-actions button:hover{border-color:var(--gold);color:var(--gold)}
+.se-item-actions button.primary{background:rgba(201,168,76,.1);border-color:var(--gold-d);color:var(--gold)}
+.se-item-actions a{font-size:10px;padding:3px 10px;border-radius:4px;text-decoration:none;border:1px solid var(--bdr);color:var(--ts);transition:all .15s}
+.se-item-actions a:hover{border-color:var(--gold);color:var(--gold)}
+.se-loading{display:flex;align-items:center;justify-content:center;gap:8px;padding:16px;color:var(--td);font-size:12px}
+.se-loading .spinner{width:16px;height:16px;border:2px solid var(--bdr);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.se-divider{font-size:10px;color:var(--td);padding:6px 12px;background:rgba(0,0,0,.02);border-radius:4px;margin:6px 0;letter-spacing:1px}
 </style>
 </head>
 <body>
@@ -362,6 +402,18 @@ footer .fb{font-family:'Noto Serif KR',serif;color:var(--gold-d);font-size:11px}
 </div>
 <div class="edit-indicator" id="editIndicator" style="display:none">
   <span id="editName"></span> 편집 중 <button onclick="clearEdit()" style="background:none;border:none;color:var(--fire);cursor:pointer;font-size:12px;margin-left:4px">✕ 취소</button>
+</div>
+</div>
+
+<!-- 인물 웹 검색 엔진 -->
+<div class="search-engine" id="searchEngine">
+<h3>有名人物 웹 검색 <span class="badge">Wikipedia · Wikidata</span></h3>
+<div class="se-bar">
+  <input type="text" id="seInput" placeholder="예: 세종대왕, 아인슈타인, 일론 머스크" onkeydown="if(event.key==='Enter')seSearch()">
+  <button onclick="seSearch()">검색</button>
+</div>
+<div id="seResults" class="se-results">
+  <div class="se-status">인물 이름을 입력하고 검색하세요</div>
 </div>
 </div>
 
@@ -1641,6 +1693,10 @@ async function dbSave(){
     clearEdit();
     document.getElementById('dbSearch').value=name;
     await dbRender();
+    // 검색엔진 초기화
+    document.getElementById('seInput').value='';
+    seResultCache=[];
+    document.getElementById('seResults').innerHTML='<div class="se-status">이름을 입력하고 검색하세요</div>';
     alert(`"${name}" 신규 저장 완료 (총 ${await idbCount()}명)`);
   }catch(e){
     console.error('DB 저장 오류:',e);
@@ -2064,6 +2120,271 @@ function cmpGo(){
   // localStorage로 데이터 전달
   localStorage.setItem('byulddang_compare',JSON.stringify(cmpList));
   window.open('compare.html','_blank');
+}
+
+// === 인물 웹 검색 엔진 ===
+let seLastQuery='';
+let seResultCache=[]; // 검색 결과 캐시 (인덱스로 안전하게 접근)
+
+async function seSearch(){
+  const q=document.getElementById('seInput').value.trim();
+  if(!q){document.getElementById('seResults').innerHTML='<div class="se-status">인물 이름을 입력하고 검색하세요</div>';return;}
+  seLastQuery=q;
+
+  // 로딩 표시
+  document.getElementById('seResults').innerHTML='<div class="se-loading"><div class="spinner"></div>검색 중...</div>';
+
+  let html='';
+
+  // 1) 내 DB에서 먼저 검색
+  try{
+    const all=await idbAll();
+    const ql=q.toLowerCase();
+    const dbMatches=all.filter(e=>{
+      const nm=(e.name||'').toLowerCase();
+      const kw=(e.keyword||'').toLowerCase();
+      const jb=(e.job||'').toLowerCase();
+      return nm.includes(ql)||kw.includes(ql)||jb.includes(ql);
+    }).slice(0,5);
+
+    if(dbMatches.length>0){
+      html+='<div class="se-divider">내 DB 검색 결과 ('+dbMatches.length+'건)</div>';
+      for(const e of dbMatches){
+        const c=e.chart||{};
+        const saju=c.ds!==undefined?`${SH[c.ds]}${BH[c.db]}`:'';
+        const cal=(e.calType==='lunar'||e.cal==='lunar')?'음력':'양력';
+        const gStr=e.gender==='F'||e.gender==='여'?'여':'남';
+        const extra=[(e.job||''),(e.keyword||'')].filter(x=>x).join(' · ');
+        html+=`<div class="se-item" onclick="dbLoadEntry(${e.id})">
+          <div class="se-item-head">
+            <span class="se-item-name">${e.name||'이름없음'}</span>
+            <span class="se-item-badge db">DB</span>
+            ${saju?'<span style="font-family:Noto Serif KR;color:var(--gold);font-weight:700">'+saju+'</span>':''}
+          </div>
+          <div class="se-item-info">
+            <span class="birth">${cal} ${e.year}.${e.month}.${e.day} ${gStr}</span>
+            ${extra?' · <span class="desc">'+extra+'</span>':''}
+          </div>
+        </div>`;
+      }
+    }
+  }catch(e){console.error('DB 검색 오류:',e);}
+
+  // 2) 한국어 위키백과 API 검색
+  try{
+    html+='<div class="se-divider">위키백과 검색 결과</div>';
+    const wikiResults=await seSearchWiki(q);
+
+    if(wikiResults.length===0){
+      html+='<div class="se-status">위키백과에서 결과를 찾을 수 없습니다</div>';
+    }else{
+      // 각 결과에 대해 Wikidata에서 생년월일 가져오기
+      const enriched=await seEnrichWithBirth(wikiResults);
+      // ★ 결과를 전역 캐시에 저장 (인덱스로 안전하게 접근)
+      seResultCache=enriched.map(r=>({
+        title:r.title,
+        birth:r.birth||null,
+        desc:r.desc||'',
+        snippet:r.snippet||'',
+        wikiUrl:'https://ko.wikipedia.org/wiki/'+encodeURIComponent(r.title),
+        namuUrl:'https://namu.wiki/w/'+encodeURIComponent(r.title)
+      }));
+
+      for(let idx=0;idx<seResultCache.length;idx++){
+        const r=seResultCache[idx];
+        const birthStr=r.birth?`${r.birth.year}년 ${r.birth.month}월 ${r.birth.day}일`:'생년월일 미상';
+        const birthClass=r.birth?'birth':'desc';
+
+        html+=`<div class="se-item">
+          <div class="se-item-head">
+            <span class="se-item-name">${r.title}</span>
+            <span class="se-item-badge wiki">위키</span>
+          </div>
+          <div class="se-item-info">
+            <span class="${birthClass}">${birthStr}</span>
+            ${r.desc?' · <span class="desc">'+r.desc+'</span>':''}
+            ${r.snippet?' <span class="desc">'+r.snippet+'</span>':''}
+          </div>
+          <div class="se-item-actions">
+            ${r.birth?`<button class="primary" onclick="seApplyIdx(${idx})">입력창에 적용</button>`
+            :`<button onclick="seApplyIdx(${idx})">이름만 적용</button>`}
+            <button onclick="seSetUrl(${idx},'wiki')">위키백과 주소 넣기</button>
+            <button onclick="seSetUrl(${idx},'namu')">나무위키 주소 넣기</button>
+          </div>
+        </div>`;
+      }
+    }
+  }catch(e){
+    console.error('위키 검색 오류:',e);
+    html+='<div class="se-status">위키백과 검색 중 오류가 발생했습니다</div>';
+  }
+
+  // 직접 등록 섹션 제거됨
+
+  document.getElementById('seResults').innerHTML=html;
+}
+
+// 한국어 위키백과 검색 API
+async function seSearchWiki(query){
+  try{
+    const url=`https://ko.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&srlimit=8&format=json&origin=*`;
+    const resp=await fetch(url);
+    const data=await resp.json();
+    return(data.query?.search||[]).map(r=>({
+      title:r.title,
+      snippet:r.snippet?r.snippet.replace(/<[^>]*>/g,'').substring(0,80)+'...':''
+    }));
+  }catch(e){
+    console.error('Wiki search error:',e);
+    return[];
+  }
+}
+
+// Wikidata에서 생년월일 일괄 조회 (최대 효율)
+async function seEnrichWithBirth(results){
+  const titles=results.map(r=>r.title);
+
+  // 1단계: 위키백과 제목 → Wikidata ID 매핑 (한 번에)
+  try{
+    const titlesParam=titles.join('|');
+    const url=`https://ko.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(titlesParam)}&prop=pageprops&ppprop=wikibase_item&format=json&origin=*`;
+    const resp=await fetch(url);
+    const data=await resp.json();
+
+    // title → wikidata ID 매핑
+    const titleToQid={};
+    if(data.query?.pages){
+      for(const p of Object.values(data.query.pages)){
+        if(p.pageprops?.wikibase_item){
+          titleToQid[p.title]=p.pageprops.wikibase_item;
+        }
+      }
+    }
+
+    // 2단계: Wikidata에서 생년월일 일괄 조회
+    const qids=Object.values(titleToQid).filter(q=>q);
+    let birthMap={}; // qid → {year, month, day}
+    let descMap={}; // qid → description
+
+    if(qids.length>0){
+      const qidsParam=qids.join('|');
+      const wdUrl=`https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${qidsParam}&props=claims|descriptions&languages=ko&format=json&origin=*`;
+      const wdResp=await fetch(wdUrl);
+      const wdData=await wdResp.json();
+
+      if(wdData.entities){
+        for(const[qid,entity] of Object.entries(wdData.entities)){
+          // 설명
+          if(entity.descriptions?.ko?.value){
+            descMap[qid]=entity.descriptions.ko.value;
+          }
+          // P569 = 생년월일
+          const birthClaim=entity.claims?.P569?.[0]?.mainsnak?.datavalue?.value;
+          if(birthClaim?.time){
+            const match=birthClaim.time.match(/([+-]?\d+)-(\d{2})-(\d{2})/);
+            if(match){
+              birthMap[qid]={
+                year:parseInt(match[1]),
+                month:parseInt(match[2]),
+                day:parseInt(match[3])
+              };
+            }
+          }
+        }
+      }
+    }
+
+    // 결과에 생년월일 병합
+    return results.map(r=>{
+      const qid=titleToQid[r.title];
+      return{
+        ...r,
+        birth:qid?birthMap[qid]:null,
+        desc:qid?descMap[qid]:null,
+        qid:qid||null
+      };
+    });
+
+  }catch(e){
+    console.error('Wikidata enrichment error:',e);
+    return results.map(r=>({...r,birth:null,desc:null}));
+  }
+}
+
+// ★ 캐시 인덱스로 검색 결과 적용 (문자열 깨짐 방지)
+function seApplyIdx(idx){
+  const r=seResultCache[idx];
+  if(!r)return;
+
+  // ★ 먼저 clearEdit() 호출 (pjob, pkeyword, pwiki를 비우므로 값 설정 전에 실행!)
+  clearEdit();
+
+  // 이름
+  document.getElementById('pname').value=r.title;
+  // 위키백과 URL을 참고 URL에
+  document.getElementById('pwiki').value=r.wikiUrl||'';
+  // 시간 "모름"
+  document.getElementById('hour').value=-1;
+
+  // 생년월일이 있으면 채우기
+  if(r.birth){
+    document.getElementById('year').value=r.birth.year;
+    document.getElementById('month').value=r.birth.month;
+    document.getElementById('day').value=r.birth.day;
+
+    // 1896년 이전 → 음력 자동 설정
+    if(r.birth.year<1896){
+      calType='lunar';
+      document.querySelectorAll('.cal-tog button').forEach(b=>b.classList.remove('act'));
+      document.querySelectorAll('.cal-tog button')[1].classList.add('act');
+      document.getElementById('leapRow').classList.add('show');
+    }else{
+      calType='solar';
+      document.querySelectorAll('.cal-tog button').forEach(b=>b.classList.remove('act'));
+      document.querySelectorAll('.cal-tog button')[0].classList.add('act');
+      document.getElementById('leapRow').classList.remove('show');
+    }
+
+    // 빠른입력
+    const calStr=r.birth.year<1896?'음력 ':'';
+    document.getElementById('quickInput').value=`${r.title} ${calStr}${r.birth.year} ${r.birth.month} ${r.birth.day}`;
+  }
+
+  // ★ 직업/키워드 자동 채우기 — clearEdit() 이후에 실행!
+  const descText=r.desc||'';
+  const snippetText=r.snippet||'';
+  const allText=descText+' '+snippetText;
+  const jobList=['정치인','대통령','왕','임금','황제','군주','가수','배우','감독','작가','화가','과학자','물리학자','수학자','철학자','발명가','기업인','장군','장관','총리','교수','의사','선수','코미디언','유튜버','작곡가','음악가','시인','소설가','건축가','디자이너','프로듀서','아나운서','기자','변호사','판사','검사','승려','목사','신부','래퍼','모델','요리사','축구선수','야구선수','농구선수','테니스선수','골퍼','복서','격투가','레슬러','CEO','엔지니어','프로그래머','군인','외교관','혁명가','탐험가','사업가','경제학자','사회학자','심리학자','생물학자','화학자','천문학자','의학자','법학자'];
+  let foundJob='';
+  for(const jk of jobList){
+    if(allText.includes(jk)){foundJob=jk;break;}
+  }
+  document.getElementById('pjob').value=foundJob;
+  document.getElementById('pkeyword').value=descText||snippetText.substring(0,60)||'';
+
+  // 시각적 피드백
+  seFeedback('pname');seFeedback('pjob');seFeedback('pkeyword');seFeedback('pwiki');
+
+  // 생년월일 있으면 자동 계산
+  if(r.birth)calc();
+}
+
+// ★ 위키백과/나무위키 주소를 참고 URL 칸에 넣기 (새 창 안 열림)
+function seSetUrl(idx,type){
+  const r=seResultCache[idx];
+  if(!r)return;
+  const url=type==='wiki'?r.wikiUrl:r.namuUrl;
+  document.getElementById('pwiki').value=url;
+  seFeedback('pwiki');
+}
+
+// 시각적 피드백 (필드가 반짝)
+function seFeedback(elId){
+  const el=document.getElementById(elId);
+  if(!el)return;
+  el.style.borderColor='var(--gold)';
+  el.style.background='rgba(201,168,76,.06)';
+  setTimeout(()=>{el.style.borderColor='';el.style.background='';},1500);
 }
 
 // Init DB
