@@ -232,7 +232,8 @@ header .sub{font-size:13px;color:var(--ts);font-weight:300}
 .ganji-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
 .ganji-col{text-align:center}
 .ganji-col-label{font-size:10px;color:var(--td);padding:2px;border-bottom:1px solid var(--bdr);margin-bottom:4px}
-.ganji-sel{width:92%;margin:2px auto;padding:3px 1px;font-size:12px;text-align:center;background:var(--bg);border:1px solid var(--bdr);border-radius:4px;color:var(--tp);font-family:inherit;display:block}
+.ganji-sel{width:92%;margin:2px auto;padding:3px 1px;font-size:12px;text-align:center;background:var(--bg);border:1px solid var(--bdr);border-radius:4px;color:var(--td);font-family:inherit;display:block;font-weight:400;transition:all .15s}
+.ganji-sel.gs-active{font-weight:700;border-color:rgba(100,80,40,.3);background:rgba(255,255,255,.9)}
 .ganji-row-label{font-size:9px;color:var(--td);margin:5px auto 1px;text-align:center;letter-spacing:-.3px;opacity:.7}
 
 /* 페이지네이션 */
@@ -337,6 +338,51 @@ footer .fb{font-family:'Noto Serif KR',serif;color:var(--gold-d);font-size:11px}
 
 <div class="section"><h3>大運 · 歲運 <span style="font-size:10px;color:var(--td);font-weight:400">— 대운을 클릭하면 세운이 펼쳐집니다</span></h3><div class="un-scroll"><div class="un-row" id="daeunRow"></div></div><div class="seun-panel" id="seunPanel"><div class="seun-panel-title" id="seunTitle"></div><div class="seun-row" id="seunRow"></div></div></div>
 
+<!-- 고급 검색 (대운 아래 배치) -->
+<div class="section" id="ganjiSearchSection">
+<h3 style="cursor:pointer;user-select:none" onclick="document.getElementById('ganjiSearchBox').style.display=document.getElementById('ganjiSearchBox').style.display==='none'?'block':'none';this.querySelector('.tog').textContent=document.getElementById('ganjiSearchBox').style.display==='none'?'▶':'▼'">인물DB 고급 검색 <span class="tog" style="font-size:10px;color:var(--td)">▶</span></h3>
+<div class="ganji-search" id="ganjiSearchBox" style="display:none;border:none;margin:0;padding:0">
+  <div class="ganji-grid">
+    <div class="ganji-col"><div class="ganji-col-label">시주</div>
+      <select class="ganji-sel" id="gs_hs"><option value="">천간</option></select>
+      <select class="ganji-sel" id="gs_hs_ss"><option value="">십신</option></select>
+      <select class="ganji-sel" id="gs_hb"><option value="">지지</option></select>
+      <select class="ganji-sel" id="gs_hb_ss"><option value="">십신</option></select>
+      <select class="ganji-sel" id="gs_hb_un"><option value="">12운성</option></select>
+      <select class="ganji-sel" id="gs_hb_sin"><option value="">12신살</option></select>
+    </div>
+    <div class="ganji-col"><div class="ganji-col-label">일주</div>
+      <select class="ganji-sel" id="gs_ds"><option value="">천간</option></select>
+      <select class="ganji-sel" id="gs_ds_ss"><option value="">십신</option></select>
+      <select class="ganji-sel" id="gs_db"><option value="">지지</option></select>
+      <select class="ganji-sel" id="gs_db_ss"><option value="">십신</option></select>
+      <select class="ganji-sel" id="gs_db_un"><option value="">12운성</option></select>
+      <select class="ganji-sel" id="gs_db_sin"><option value="">12신살</option></select>
+    </div>
+    <div class="ganji-col"><div class="ganji-col-label">월주</div>
+      <select class="ganji-sel" id="gs_ms"><option value="">천간</option></select>
+      <select class="ganji-sel" id="gs_ms_ss"><option value="">십신</option></select>
+      <select class="ganji-sel" id="gs_mb"><option value="">지지</option></select>
+      <select class="ganji-sel" id="gs_mb_ss"><option value="">십신</option></select>
+      <select class="ganji-sel" id="gs_mb_un"><option value="">12운성</option></select>
+      <select class="ganji-sel" id="gs_mb_sin"><option value="">12신살</option></select>
+    </div>
+    <div class="ganji-col"><div class="ganji-col-label">연주</div>
+      <select class="ganji-sel" id="gs_ys"><option value="">천간</option></select>
+      <select class="ganji-sel" id="gs_ys_ss"><option value="">십신</option></select>
+      <select class="ganji-sel" id="gs_yb"><option value="">지지</option></select>
+      <select class="ganji-sel" id="gs_yb_ss"><option value="">십신</option></select>
+      <select class="ganji-sel" id="gs_yb_un"><option value="">12운성</option></select>
+      <select class="ganji-sel" id="gs_yb_sin"><option value="">12신살</option></select>
+    </div>
+  </div>
+  <div style="text-align:center;margin-top:8px">
+    <button class="db-btn primary" onclick="dbSearchAdvanced()">검색</button>
+    <button class="db-btn" onclick="advSearchReset()">초기화</button>
+  </div>
+</div>
+</div>
+
 <div class="info-row" style="display:none">
 <div class="section" style="width:100%"><h3>合沖刑破害 · 원진 · 가원진 · 격각</h3><div id="relBox"></div></div>
 </div>
@@ -413,7 +459,7 @@ footer .fb{font-family:'Noto Serif KR',serif;color:var(--gold-d);font-size:11px}
   <button onclick="seSearch()">검색</button>
 </div>
 <div id="seResults" class="se-results">
-  <div class="se-status">인물 이름을 입력하고 검색하세요</div>
+  <div class="se-status"></div>
 </div>
 </div>
 
@@ -423,48 +469,7 @@ footer .fb{font-family:'Noto Serif KR',serif;color:var(--gold-d);font-size:11px}
   <input class="db-input" id="dbSearch" placeholder="이름/키워드 검색" oninput="dbRender()">
 </div>
 
-<!-- 고급 검색 -->
-<div class="ganji-search" id="ganjiSearchBox">
-  <div class="ganji-search-title">고급 검색</div>
-  <div class="ganji-grid">
-    <div class="ganji-col"><div class="ganji-col-label">시주</div>
-      <select class="ganji-sel" id="gs_hs"><option value="">천간</option></select>
-      <select class="ganji-sel" id="gs_hs_ss"><option value="">십신</option></select>
-      <select class="ganji-sel" id="gs_hb"><option value="">지지</option></select>
-      <select class="ganji-sel" id="gs_hb_ss"><option value="">십신</option></select>
-      <select class="ganji-sel" id="gs_hb_un"><option value="">12운성</option></select>
-      <select class="ganji-sel" id="gs_hb_sin"><option value="">12신살</option></select>
-    </div>
-    <div class="ganji-col"><div class="ganji-col-label">일주</div>
-      <select class="ganji-sel" id="gs_ds"><option value="">천간</option></select>
-      <select class="ganji-sel" id="gs_ds_ss"><option value="">십신</option></select>
-      <select class="ganji-sel" id="gs_db"><option value="">지지</option></select>
-      <select class="ganji-sel" id="gs_db_ss"><option value="">십신</option></select>
-      <select class="ganji-sel" id="gs_db_un"><option value="">12운성</option></select>
-      <select class="ganji-sel" id="gs_db_sin"><option value="">12신살</option></select>
-    </div>
-    <div class="ganji-col"><div class="ganji-col-label">월주</div>
-      <select class="ganji-sel" id="gs_ms"><option value="">천간</option></select>
-      <select class="ganji-sel" id="gs_ms_ss"><option value="">십신</option></select>
-      <select class="ganji-sel" id="gs_mb"><option value="">지지</option></select>
-      <select class="ganji-sel" id="gs_mb_ss"><option value="">십신</option></select>
-      <select class="ganji-sel" id="gs_mb_un"><option value="">12운성</option></select>
-      <select class="ganji-sel" id="gs_mb_sin"><option value="">12신살</option></select>
-    </div>
-    <div class="ganji-col"><div class="ganji-col-label">연주</div>
-      <select class="ganji-sel" id="gs_ys"><option value="">천간</option></select>
-      <select class="ganji-sel" id="gs_ys_ss"><option value="">십신</option></select>
-      <select class="ganji-sel" id="gs_yb"><option value="">지지</option></select>
-      <select class="ganji-sel" id="gs_yb_ss"><option value="">십신</option></select>
-      <select class="ganji-sel" id="gs_yb_un"><option value="">12운성</option></select>
-      <select class="ganji-sel" id="gs_yb_sin"><option value="">12신살</option></select>
-    </div>
-  </div>
-  <div style="text-align:center;margin-top:8px">
-    <button class="db-btn primary" onclick="dbSearchAdvanced()">검색</button>
-    <button class="db-btn" onclick="advSearchReset()">초기화</button>
-  </div>
-</div>
+<!-- 고급 검색: 왼쪽 패널로 이동됨 -->
 
 <div class="db-actions-v" style="margin-top:8px">
   <button class="db-btn" onclick="document.getElementById('dbImportFile').click()">불러오기(JSON)</button>
@@ -1752,7 +1757,9 @@ function clearEdit(){
 async function dbRender(){
   await dbUpdateCount();
   const all=await idbAll();
-  const q=(document.getElementById('dbSearch')?.value||'').toLowerCase();
+  const qRaw=(document.getElementById('dbSearch')?.value||'').toLowerCase();
+  const q=qRaw;
+  const qNoSp=qRaw.replace(/\s/g,''); // 공백 제거 버전
   let filtered=all;
   if(q){
     filtered=all.filter(e=>{
@@ -1760,7 +1767,8 @@ async function dbRender(){
       const kw=(e.keyword||'').toLowerCase();
       const jb=(e.job||'').toLowerCase();
       const saju=e.chart?`${Sh[e.chart.ys]}${Bh[e.chart.yb]} ${Sh[e.chart.mStem]}${Bh[e.chart.mBranch]} ${Sh[e.chart.ds]}${Bh[e.chart.db]}`:'';
-      return nm.includes(q)||kw.includes(q)||jb.includes(q)||saju.includes(q);
+      const nmNoSp=nm.replace(/\s/g,'');
+      return nm.includes(q)||nmNoSp.includes(qNoSp)||kw.includes(q)||jb.includes(q)||saju.includes(q);
     });
   }
   dbFilteredCache=filtered;
@@ -1850,6 +1858,16 @@ async function dbClear(){
 async function dbExportJSON(){
   const all=await idbAll();
   const blob=new Blob([JSON.stringify({db:all},null,2)],{type:'application/json'});
+  // showSaveFilePicker 지원 시 → "다른 이름으로 저장" 대화상자
+  if(window.showSaveFilePicker){
+    try{
+      const handle=await showSaveFilePicker({suggestedName:'인물DB_import_with_charts.json',types:[{description:'JSON',accept:{'application/json':['.json']}}]});
+      const w=await handle.createWritable();
+      await w.write(blob);await w.close();
+      alert(`저장 완료: ${handle.name} (${all.length}명)`);return;
+    }catch(e){if(e.name==='AbortError')return;} // 취소 시 무시
+  }
+  // 미지원 브라우저 → 기존 다운로드 방식
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download='인물DB_import_with_charts.json';a.click();
 }
@@ -1935,41 +1953,57 @@ const GS_BRANCH_UN=['gs_hb_un','gs_db_un','gs_mb_un','gs_yb_un'];
 const GS_BRANCH_SIN=['gs_hb_sin','gs_db_sin','gs_mb_sin','gs_yb_sin'];
 const GS_ALL=[...GS_STEMS,...GS_BRANCHES,...GS_STEM_SS,...GS_BRANCH_SS,...GS_BRANCH_UN,...GS_BRANCH_SIN];
 
+function _ohColors(){return{wood:getComputedStyle(document.documentElement).getPropertyValue('--wood').trim(),fire:getComputedStyle(document.documentElement).getPropertyValue('--fire').trim(),earth:getComputedStyle(document.documentElement).getPropertyValue('--earth').trim(),metal:getComputedStyle(document.documentElement).getPropertyValue('--metal').trim(),water:getComputedStyle(document.documentElement).getPropertyValue('--water').trim()};}
+function _gsUpdateColor(sel,type){
+  const oc=_ohColors();
+  if(sel.value===''){sel.style.color='';sel.classList.remove('gs-active');return;}
+  sel.classList.add('gs-active');
+  if(type==='stem'){const idx=parseInt(sel.value);sel.style.color=oc[EC[SE[idx]]]||'';}
+  else if(type==='branch'){const idx=parseInt(sel.value);sel.style.color=oc[EC[BE[idx]]]||'';}
+  else{sel.style.color='var(--tp)';}
+}
 function initGanjiSelects(){
+  const oc=_ohColors();const cmap={wood:oc.wood,fire:oc.fire,earth:oc.earth,metal:oc.metal,water:oc.water};
   // 천간 간지
   GS_STEMS.forEach(id=>{
     const el=document.getElementById(id);
-    for(let i=0;i<10;i++){const o=document.createElement('option');o.value=i;o.textContent=SH[i]+' '+Sh[i];el.appendChild(o);}
+    for(let i=0;i<10;i++){const o=document.createElement('option');o.value=i;o.textContent=SH[i]+' '+Sh[i];o.style.color=cmap[EC[SE[i]]];el.appendChild(o);}
+    el.addEventListener('change',()=>_gsUpdateColor(el,'stem'));
   });
   // 지지 간지
   GS_BRANCHES.forEach(id=>{
     const el=document.getElementById(id);
-    for(let i=0;i<12;i++){const o=document.createElement('option');o.value=i;o.textContent=BH[i]+' '+Bh[i];el.appendChild(o);}
+    for(let i=0;i<12;i++){const o=document.createElement('option');o.value=i;o.textContent=BH[i]+' '+Bh[i];o.style.color=cmap[EC[BE[i]]];el.appendChild(o);}
+    el.addEventListener('change',()=>_gsUpdateColor(el,'branch'));
   });
   // 천간 십신
   GS_STEM_SS.forEach(id=>{
     const el=document.getElementById(id);
     for(let i=0;i<10;i++){const o=document.createElement('option');o.value=i;o.textContent=SSN[i];el.appendChild(o);}
+    el.addEventListener('change',()=>_gsUpdateColor(el,'other'));
   });
   // 지지 십신
   GS_BRANCH_SS.forEach(id=>{
     const el=document.getElementById(id);
     for(let i=0;i<10;i++){const o=document.createElement('option');o.value=i;o.textContent=SSN[i];el.appendChild(o);}
+    el.addEventListener('change',()=>_gsUpdateColor(el,'other'));
   });
   // 12운성
   GS_BRANCH_UN.forEach(id=>{
     const el=document.getElementById(id);
     for(let i=0;i<12;i++){const o=document.createElement('option');o.value=i;o.textContent=TCN[i];el.appendChild(o);}
+    el.addEventListener('change',()=>_gsUpdateColor(el,'other'));
   });
   // 12신살
   GS_BRANCH_SIN.forEach(id=>{
     const el=document.getElementById(id);
     for(let i=0;i<12;i++){const o=document.createElement('option');o.value=i;o.textContent=SINSAL12_NAMES[i];el.appendChild(o);}
+    el.addEventListener('change',()=>_gsUpdateColor(el,'other'));
   });
 }
 
 function advSearchReset(){
-  GS_ALL.forEach(id=>document.getElementById(id).value='');
+  GS_ALL.forEach(id=>{const el=document.getElementById(id);el.value='';el.style.color='';el.classList.remove('gs-active');});
   dbPage=1;dbRender();
 }
 
@@ -2128,7 +2162,7 @@ let seResultCache=[]; // 검색 결과 캐시 (인덱스로 안전하게 접근)
 
 async function seSearch(){
   const q=document.getElementById('seInput').value.trim();
-  if(!q){document.getElementById('seResults').innerHTML='<div class="se-status">인물 이름을 입력하고 검색하세요</div>';return;}
+  if(!q){document.getElementById('seResults').innerHTML='';return;}
   seLastQuery=q;
 
   // 로딩 표시
@@ -2332,22 +2366,14 @@ function seApplyIdx(idx){
     document.getElementById('month').value=r.birth.month;
     document.getElementById('day').value=r.birth.day;
 
-    // 1896년 이전 → 음력 자동 설정
-    if(r.birth.year<1896){
-      calType='lunar';
-      document.querySelectorAll('.cal-tog button').forEach(b=>b.classList.remove('act'));
-      document.querySelectorAll('.cal-tog button')[1].classList.add('act');
-      document.getElementById('leapRow').classList.add('show');
-    }else{
-      calType='solar';
-      document.querySelectorAll('.cal-tog button').forEach(b=>b.classList.remove('act'));
-      document.querySelectorAll('.cal-tog button')[0].classList.add('act');
-      document.getElementById('leapRow').classList.remove('show');
-    }
+    // 양력 기본값 (음력은 사용자가 직접 선택)
+    calType='solar';
+    document.querySelectorAll('.cal-tog button').forEach(b=>b.classList.remove('act'));
+    document.querySelectorAll('.cal-tog button')[0].classList.add('act');
+    document.getElementById('leapRow').classList.remove('show');
 
     // 빠른입력
-    const calStr=r.birth.year<1896?'음력 ':'';
-    document.getElementById('quickInput').value=`${r.title} ${calStr}${r.birth.year} ${r.birth.month} ${r.birth.day}`;
+    document.getElementById('quickInput').value=`${r.title} ${r.birth.year} ${r.birth.month} ${r.birth.day}`;
   }
 
   // ★ 직업/키워드 자동 채우기 — clearEdit() 이후에 실행!
