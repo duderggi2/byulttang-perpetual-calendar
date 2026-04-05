@@ -12,7 +12,11 @@ const CORE_ASSETS = [
 
 // 인물DB는 별도 캐시 (크기가 크므로 분리)
 const DB_CACHE = 'byulddang-db-v1';
-const DB_FILE = './인물DB_import_with_charts.json';
+const DB_CHUNKS = [
+  './db_chunk_1.json',
+  './db_chunk_2.json',
+  './db_chunk_3.json'
+];
 
 // 설치: 핵심 파일 캐싱
 self.addEventListener('install', event => {
@@ -21,12 +25,16 @@ self.addEventListener('install', event => {
       console.log('[SW] 핵심 파일 캐싱 중...');
       return cache.addAll(CORE_ASSETS);
     }).then(() => {
-      // 인물DB는 별도로 캐싱 (실패해도 설치는 진행)
+      // 인물DB 청크 별도 캐싱 (실패해도 설치는 진행)
       return caches.open(DB_CACHE).then(cache => {
-        console.log('[SW] 인물DB 캐싱 시작 (46MB, 시간이 걸릴 수 있음)...');
-        return cache.add(DB_FILE).catch(err => {
-          console.warn('[SW] 인물DB 캐싱 실패 (나중에 재시도):', err);
-        });
+        console.log('[SW] 인물DB 청크 캐싱 시작...');
+        return Promise.all(
+          DB_CHUNKS.map(chunk =>
+            cache.add(chunk).catch(err =>
+              console.warn('[SW] 청크 캐싱 실패:', chunk, err)
+            )
+          )
+        );
       });
     }).then(() => self.skipWaiting())
   );
