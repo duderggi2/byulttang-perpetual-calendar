@@ -1,0 +1,82 @@
+// 별땅 만세력 Pro — Service Worker
+// 버전을 바꾸면 캐시가 갱신됨
+const CACHE_VERSION = 'byulddang-v1.0.0';
+
+// 캐시할 파일 목록
+const CORE_ASSETS = [
+  './',
+  './index.html',
+  './compare.html',
+  './manifest.json'
+];
+
+// 인물DB는 별도 캐시 (크기가 크므로 분리)
+const DB_CACHE = 'byulddang-db-v1';
+const DB_FILE = './인물DB_import_with_charts.json';
+
+// 설치: 핵심 파일 캐싱
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_VERSION).then(cache => {
+      console.log('[SW] 핵심 파일 캐싱 중...');
+      return cache.addAll(CORE_ASSETS);
+    }).then(() => {
+      // 인물DB는 별도로 캐싱 (실패해도 설치는 진행)
+      return caches.open(DB_CACHE).then(cache => {
+        console.log('[SW] 인물DB 캐싱 시작 (46MB, 시간이 걸릴 수 있음)...');
+        return cache.add(DB_FILE).catch(err => {
+          console.warn('[SW] 인물DB 캐싱 실패 (나중에 재시도):', err);
+        });
+      });
+    }).then(() => self.skipWaiting())
+  );
+});
+
+// 활성화: 이전 버전 캐시 정리
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(keys => {
+      return Promise.all(
+        keys.filter(key => key !== CACHE_VERSION && key !== DB_CACHE)
+            .map(key => {
+              console.log('[SW] 이전 캐시 삭제:', key);
+              return caches.delete(key);
+            })
+      );
+    }).then(() => self.clients.claim())
+  );
+});
+
+// 요청 가로채기: 캐시 우선, 없으면 네트워크
+self.addEventListener('fetch', event => {
+  const url = new URL(event.request.url);
+
+  // 외부 API 요청 (위키백과 등)은 네트워크 우선
+  if (url.origin !== self.location.origin) {
+    event.respondWith(
+      fetch(event.request).catch(() => {
+        return new Response('오프라인 상태에서는 외부 검색이 불가합니다.', {
+          status: 503,
+          headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+        });
+      })
+    );
+    return;
+  }
+
+  // 로컬 파일: 캐시 우선 → 네트워크 폴백
+  event.respondWith(
+    caches.match(event.request).then(cached => {
+      if (cached) return cached;
+      return fetch(event.request).then(response => {
+        // 정상 응답이면 캐시에 저장
+        if (response.ok) {
+          const clone = response.clone();
+          const cacheName = event.request.url.includes('인물DB') ? DB_CACHE : CACHE_VERSION;
+          caches.open(cacheName).then(cache => cache.put(event.request, clone));
+        }
+        return response;
+      });
+    })
+  );
+});

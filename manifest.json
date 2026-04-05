@@ -1,0 +1,22 @@
+{
+  "name": "별땅 만세력 Pro",
+  "short_name": "만세력Pro",
+  "description": "사주 만세력 · 대운 · 세운 · 신살 · 인물DB — 별땅역학연구소",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#1a1a2e",
+  "theme_color": "#c8a96e",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

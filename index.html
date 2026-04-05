@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>별땅역학연구소 — 사주 만세력 Pro</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#c8a96e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="만세력Pro">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700;900&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#faf8f3;--card:#ffffff;--card2:#f5f2eb;--gold:#9a7a2e;--gold-l:#7a6020;--gold-d:#b8952e;--tp:#1a1a18;--ts:#5a5850;--td:#9a9890;--wood:#2e7d4f;--fire:#c03030;--earth:#a07e28;--metal:#8a8a9a;--water:#1a3d7a;--bdr:rgba(100,80,40,.12);--r:10px}
@@ -2429,6 +2435,47 @@ dbInit();
   document.getElementById('day').value=now.getDate();
   document.getElementById('hour').value=now.getHours();
   calc();
+})();
+
+// ★ PWA: Service Worker 등록
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js')
+    .then(reg=>console.log('[PWA] Service Worker 등록 완료:', reg.scope))
+    .catch(err=>console.warn('[PWA] Service Worker 등록 실패:', err));
+}
+
+// ★ PWA: 인물DB 자동 로드 (IndexedDB가 비어있으면 JSON에서 불러오기)
+(async function pwaAutoLoadDB(){
+  try{
+    const count=await idbCount();
+    if(count>0){
+      console.log(`[PWA] 인물DB 이미 로드됨: ${count}명`);
+      return;
+    }
+    console.log('[PWA] 인물DB 자동 로드 시작...');
+    const resp=await fetch('./인물DB_import_with_charts.json');
+    if(!resp.ok) throw new Error('DB 파일 없음: '+resp.status);
+    const data=await resp.json();
+    const arr=data.db||data;
+    if(!Array.isArray(arr)) throw new Error('DB 형식 오류');
+    // 로딩 표시
+    const prog=document.createElement('div');
+    prog.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--card);border:2px solid var(--gold);border-radius:12px;padding:24px;z-index:9999;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.3);min-width:280px';
+    prog.innerHTML='<div style="font-size:14px;color:var(--gold);margin-bottom:8px">인물DB 로드 중... (최초 1회)</div><div id="pwaLoadProg" style="font-size:12px;color:var(--ts)">준비 중...</div>';
+    document.body.appendChild(prog);
+    const CHUNK=500;
+    for(let i=0;i<arr.length;i+=CHUNK){
+      const chunk=arr.slice(i,i+CHUNK);
+      await idbAddBulk(chunk);
+      document.getElementById('pwaLoadProg').textContent=`${Math.min(i+CHUNK,arr.length)} / ${arr.length}명`;
+      await new Promise(r=>setTimeout(r,0));
+    }
+    document.body.removeChild(prog);
+    await dbRender();
+    console.log(`[PWA] 인물DB 자동 로드 완료: ${arr.length}명`);
+  }catch(e){
+    console.log('[PWA] 인물DB 자동 로드 건너뜀:', e.message);
+  }
 })();
 </script>
 </body>
