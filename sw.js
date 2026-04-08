@@ -1,6 +1,6 @@
 // 별땅 만세력 Pro — Service Worker
 // 버전을 바꾸면 캐시가 갱신됨
-const CACHE_VERSION = 'byulddang-v1.0.0';
+const CACHE_VERSION = 'byulddang-v1.1.0';
 
 // 캐시할 파일 목록
 const CORE_ASSETS = [
