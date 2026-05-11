@@ -664,7 +664,10 @@ function hourP(h,ds){
   if(h<0)return null;
   let t=h*60+30;if(t>=1440)t-=1440;
   let bi;if(t<120)bi=0;else if(t<240)bi=1;else if(t<360)bi=2;else if(t<480)bi=3;else if(t<600)bi=4;else if(t<720)bi=5;else if(t<840)bi=6;else if(t<960)bi=7;else if(t<1080)bi=8;else if(t<1200)bi=9;else if(t<1320)bi=10;else bi=11;
-  let eds=ds;if(h>=23)eds=(ds+1)%10;
+  // v2 정정 (2026-05-10): 일주 변경 조건 수정.
+  // 기존: if(h>=23)eds=(ds+1)%10; — 23시 입력 시 일주 다음 날로 잘못 넘김 (boundary 비일관)
+  // 30분 보정 후 t 기준으로 자시(bi==0)이면서 입력 시간이 자정 직전(h>=23)일 때만 다음 날로
+  let eds=ds;if(h>=23&&bi===0)eds=(ds+1)%10;
   return{s:(eds*2+bi)%10,b:bi};
 }
 
@@ -2597,7 +2600,7 @@ if('serviceWorker' in navigator){
     .catch(err=>console.warn('[PWA] Service Worker 등록 실패:', err));
 }
 
-// ★ PWA: 인물DB 자동 로드 (IndexedDB가 비어있으면 JSON에서 불러오기)
+// ★ PWA: 인물DB 자동 로드 (3개 청크 파일에서 순차 불러오기)
 (async function pwaAutoLoadDB(){
   try{
     const count=await idbCount();
@@ -2606,26 +2609,31 @@ if('serviceWorker' in navigator){
       return;
     }
     console.log('[PWA] 인물DB 자동 로드 시작...');
-    const resp=await fetch('./인물DB_import_with_charts.json');
-    if(!resp.ok) throw new Error('DB 파일 없음: '+resp.status);
-    const data=await resp.json();
-    const arr=data.db||data;
-    if(!Array.isArray(arr)) throw new Error('DB 형식 오류');
     // 로딩 표시
     const prog=document.createElement('div');
     prog.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--card);border:2px solid var(--gold);border-radius:12px;padding:24px;z-index:9999;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.3);min-width:280px';
     prog.innerHTML='<div style="font-size:14px;color:var(--gold);margin-bottom:8px">인물DB 로드 중... (최초 1회)</div><div id="pwaLoadProg" style="font-size:12px;color:var(--ts)">준비 중...</div>';
     document.body.appendChild(prog);
-    const CHUNK=500;
-    for(let i=0;i<arr.length;i+=CHUNK){
-      const chunk=arr.slice(i,i+CHUNK);
-      await idbAddBulk(chunk);
-      document.getElementById('pwaLoadProg').textContent=`${Math.min(i+CHUNK,arr.length)} / ${arr.length}명`;
-      await new Promise(r=>setTimeout(r,0));
+    const DB_CHUNKS=['./db_chunk_1.json','./db_chunk_2.json','./db_chunk_3.json'];
+    let totalLoaded=0;
+    for(let ci=0;ci<DB_CHUNKS.length;ci++){
+      document.getElementById('pwaLoadProg').textContent=`파일 ${ci+1}/${DB_CHUNKS.length} 다운로드 중...`;
+      const resp=await fetch(DB_CHUNKS[ci]);
+      if(!resp.ok) throw new Error(DB_CHUNKS[ci]+' 없음: '+resp.status);
+      const arr=await resp.json();
+      if(!Array.isArray(arr)) throw new Error('DB 형식 오류');
+      const BATCH=500;
+      for(let i=0;i<arr.length;i+=BATCH){
+        const batch=arr.slice(i,i+BATCH);
+        await idbAddBulk(batch);
+        totalLoaded+=batch.length;
+        document.getElementById('pwaLoadProg').textContent=`${totalLoaded}명 로드 완료 (${ci+1}/${DB_CHUNKS.length})`;
+        await new Promise(r=>setTimeout(r,0));
+      }
     }
     document.body.removeChild(prog);
     await dbRender();
-    console.log(`[PWA] 인물DB 자동 로드 완료: ${arr.length}명`);
+    console.log(`[PWA] 인물DB 자동 로드 완료: ${totalLoaded}명`);
   }catch(e){
     console.log('[PWA] 인물DB 자동 로드 건너뜀:', e.message);
   }
