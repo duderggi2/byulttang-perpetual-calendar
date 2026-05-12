@@ -1369,7 +1369,7 @@ function recentLoadEntry(idx){
   document.getElementById('pname').value=e.name==='(이름없음)'?'':(e.name||'');
   document.getElementById('pjob').value=e.job||'';
   document.getElementById('pkeyword').value=e.keyword||'';
-  document.getElementById('pwiki').value=e.namuUrl||'';
+  document.getElementById('pwiki').value=e.namuUrl||e.wikiUrl||'';
   const isLunar=e.calType==='lunar';
   if(isLunar)setCal('lunar',document.querySelectorAll('.cal-tog button')[1]);
   else setCal('solar',document.querySelectorAll('.cal-tog button')[0]);
@@ -1954,11 +1954,11 @@ function dbRenderPage(){
     const cal=(e.calType==='lunar'||e.cal==='lunar')?'음':'양';
     const gd=e.gender==='M'||e.gender==='남'||e.gender==='male'?'M':e.gender==='F'||e.gender==='여'||e.gender==='female'?'F':e.gender||'';
     const extra=[(e.job||''),(e.keyword||'')].filter(x=>x).join(' · ');
-    const namuLink=e.namuUrl||e.wiki||(e.name?'https://namu.wiki/w/'+encodeURIComponent(e.name):'');
+    const namuLink=e.namuUrl||e.wikiUrl||e.wiki||(e.name?'https://namu.wiki/w/'+encodeURIComponent(e.name):'');
     const inCmp=cmpList.some(x=>x.id===e.id);
     return `<div class="db-item" onclick="dbLoadEntry(${e.id})">
       <span class="name">${e.name||''} <span style="color:var(--gold-d)">${c.ds!==undefined?SH[c.ds]+BH[c.db]:''}</span>${extra?'<span style="color:var(--td);font-size:10px;margin-left:4px">'+extra+'</span>':''}</span>
-      <span class="info">${cal} ${e.year}.${e.month}.${e.day} ${gd} · ${saju}${namuLink?'<a href="'+namuLink+'" target="_blank" onclick="event.stopPropagation()" style="color:var(--gold);margin-left:4px;font-size:10px">나무위키</a>':''}</span>
+      <span class="info">${cal} ${e.year}.${e.month}.${e.day} ${gd} · ${saju}${namuLink?'<a href="'+namuLink+'" target="_blank" onclick="event.stopPropagation()" style="color:var(--gold);margin-left:4px;font-size:10px">'+(namuLink.includes('wikipedia.org')?'위키':namuLink.includes('namu.wiki')?'나무':'링크')+'</a>':''}</span>
       <span class="cmp-add${inCmp?' added':''}" onclick="event.stopPropagation();cmpToggle(${e.id})" title="비교 목록에 추가">${inCmp?'담김':'비교'}</span>
       <span class="del" onclick="event.stopPropagation();dbDelEntry(${e.id})">✕</span>
     </div>`;
@@ -1986,7 +1986,7 @@ async function dbLoadEntry(id){
   document.getElementById('pname').value=e.name||'';
   document.getElementById('pjob').value=e.job||'';
   document.getElementById('pkeyword').value=e.keyword||'';
-  const namuVal=e.namuUrl||e.wiki||(e.name?'https://namu.wiki/w/'+encodeURIComponent(e.name):'');
+  const namuVal=e.namuUrl||e.wikiUrl||e.wiki||(e.name?'https://namu.wiki/w/'+encodeURIComponent(e.name):'');
   document.getElementById('pwiki').value=namuVal;
   const isLunar=(e.calType==='lunar'||e.cal==='lunar');
   if(isLunar){setCal('lunar',document.querySelectorAll('.cal-tog button')[1]);}
@@ -2601,12 +2601,22 @@ if('serviceWorker' in navigator){
 }
 
 // ★ PWA: 인물DB 자동 로드 (3개 청크 파일에서 순차 불러오기)
+// 2026-05-12: 인물DB 버전 체크 + 자동 갱신 박힘
+const PWA_DB_VERSION='2026-05-12-40193'; // 데이터 갱신 시 이 값 바꾸면 자동 재로드
 (async function pwaAutoLoadDB(){
   try{
     const count=await idbCount();
-    if(count>0){
-      console.log(`[PWA] 인물DB 이미 로드됨: ${count}명`);
+    const storedVer=localStorage.getItem('byulddang_db_version');
+    if(count>0 && storedVer===PWA_DB_VERSION){
+      console.log(`[PWA] 인물DB 이미 로드됨: ${count}명 (버전 ${storedVer})`);
       return;
+    }
+    if(count>0 && storedVer!==PWA_DB_VERSION){
+      console.log(`[PWA] 인물DB 버전 변경 감지 (${storedVer||'없음'}→${PWA_DB_VERSION}). 초기화 후 재로드.`);
+      const db=await idbOpen();
+      const tx=db.transaction('persons','readwrite');
+      tx.objectStore('persons').clear();
+      await new Promise(r=>tx.oncomplete=r);
     }
     console.log('[PWA] 인물DB 자동 로드 시작...');
     // 로딩 표시
@@ -2633,7 +2643,8 @@ if('serviceWorker' in navigator){
     }
     document.body.removeChild(prog);
     await dbRender();
-    console.log(`[PWA] 인물DB 자동 로드 완료: ${totalLoaded}명`);
+    localStorage.setItem('byulddang_db_version', PWA_DB_VERSION);
+    console.log(`[PWA] 인물DB 자동 로드 완료: ${totalLoaded}명 (버전 ${PWA_DB_VERSION})`);
   }catch(e){
     console.log('[PWA] 인물DB 자동 로드 건너뜀:', e.message);
   }
