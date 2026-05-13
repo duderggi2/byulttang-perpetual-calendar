@@ -2657,13 +2657,15 @@ function closeSameDayModal(){
 async function fetchSameDay(y, m, d){
   const dateStr=`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}T00:00:00Z`;
   // P569(출생일)을 첫 줄로 박아 인덱스 활용 — 훨씬 빠름
-  const sparql=`SELECT ?person ?personLabel ?occupationLabel ?countryLabel ?dod ?genderLabel WHERE {
+  const sparql=`SELECT ?person ?personLabel ?occupationLabel ?countryLabel ?dod ?genderLabel ?koWiki ?enWiki WHERE {
   ?person wdt:P569 "${dateStr}"^^xsd:dateTime ;
           wdt:P31 wd:Q5 .
   OPTIONAL { ?person wdt:P570 ?dod }
   OPTIONAL { ?person wdt:P106 ?occupation }
   OPTIONAL { ?person wdt:P27 ?country }
   OPTIONAL { ?person wdt:P21 ?gender }
+  OPTIONAL { ?koWiki schema:about ?person ; schema:isPartOf <https://ko.wikipedia.org/> }
+  OPTIONAL { ?enWiki schema:about ?person ; schema:isPartOf <https://en.wikipedia.org/> }
   SERVICE wikibase:label { bd:serviceParam wikibase:language "ko,en". }
 } LIMIT 200`;
   const url='https://query.wikidata.org/sparql?query='+encodeURIComponent(sparql)+'&format=json';
@@ -2707,11 +2709,13 @@ function renderSameDay(bindings){
   for(const b of bindings){
     const pid=b.person.value.split('/').pop();
     const name=b.personLabel?b.personLabel.value:pid;
-    if(!people[pid])people[pid]={pid,name,occs:new Set(),countries:new Set(),dod:'',gender:''};
+    if(!people[pid])people[pid]={pid,name,occs:new Set(),countries:new Set(),dod:'',gender:'',koWiki:'',enWiki:''};
     if(b.occupationLabel)people[pid].occs.add(b.occupationLabel.value);
     if(b.countryLabel)people[pid].countries.add(b.countryLabel.value);
     if(b.dod)people[pid].dod=b.dod.value.substring(0,10);
     if(b.genderLabel)people[pid].gender=b.genderLabel.value;
+    if(b.koWiki&&!people[pid].koWiki)people[pid].koWiki=b.koWiki.value;
+    if(b.enWiki&&!people[pid].enWiki)people[pid].enWiki=b.enWiki.value;
   }
   const list=Object.values(people);
   document.getElementById('sdLoading').style.display='none';
@@ -2729,13 +2733,17 @@ function renderSameDay(bindings){
     const occ=[...p.occs].slice(0,3).join(', ')||'';
     const cou=[...p.countries].slice(0,2).join(', ')||'';
     const dod=p.dod?`<span class="sd-dod">✝ ${p.dod}</span>`:'';
-    const url=`https://www.wikidata.org/wiki/${p.pid}`;
+    // 한국어 위키 우선, 없으면 영문 위키, 둘 다 없으면 Wikidata
+    let url, label;
+    if(p.koWiki){ url=p.koWiki; label='한국어 위키'; }
+    else if(p.enWiki){ url=p.enWiki; label='영문 위키'; }
+    else { url=`https://www.wikidata.org/wiki/${p.pid}`; label='Wikidata'; }
     return `<div class="sd-item">
       <div>
         <div class="sd-name">${escapeHtml(p.name)}${dod}</div>
         <div class="sd-meta">${escapeHtml(cou)} · ${escapeHtml(occ)}</div>
       </div>
-      <a class="sd-link" href="${url}" target="_blank">Wikidata ↗</a>
+      <a class="sd-link" href="${url}" target="_blank">${label} ↗</a>
     </div>`;
   }).join('');
   document.getElementById('sdList').innerHTML=`<div style="margin-bottom:8px;font-size:12px;color:var(--gold-d)">총 <b>${list.length}</b>명 (사망 ${list.filter(p=>p.dod).length}명)</div>`+html;
