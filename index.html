@@ -66,6 +66,9 @@ header .sub{font-size:13px;color:var(--ts);font-weight:300}
 .sd-box .sd-item{padding:8px 12px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center;gap:10px}
 .sd-box .sd-item:hover{background:var(--card2)}
 .sd-box .sd-name{font-weight:600;color:var(--tp);font-size:13px}
+.sd-box .sd-gender{display:inline-block;font-size:10px;font-weight:700;padding:1px 5px;border-radius:3px;margin-right:5px;vertical-align:middle}
+.sd-box .sd-gender.sd-male{background:rgba(74,111,181,.15);color:#4a6fb5}
+.sd-box .sd-gender.sd-female{background:rgba(192,48,48,.15);color:var(--fire)}
 .sd-box .sd-meta{font-size:11px;color:var(--ts)}
 .sd-box .sd-dod{color:var(--fire);font-size:10px;margin-left:4px}
 .sd-box .sd-link{color:var(--gold);text-decoration:none;font-size:11px}
@@ -2717,7 +2720,9 @@ function renderSameDay(bindings){
     if(b.koWiki&&!people[pid].koWiki)people[pid].koWiki=b.koWiki.value;
     if(b.enWiki&&!people[pid].enWiki)people[pid].enWiki=b.enWiki.value;
   }
-  const list=Object.values(people);
+  let list=Object.values(people);
+  // Q로 시작하는 자리 (이름 라벨 X) 필터 — 별땅 정수: 이름 모르는 자리는 의미 X
+  list=list.filter(p=>!/^Q\d+$/.test(p.name));
   document.getElementById('sdLoading').style.display='none';
   if(list.length===0){
     document.getElementById('sdList').innerHTML='<div style="padding:20px;text-align:center;color:var(--td)">Wikidata에 같은 날 등재된 인물이 없습니다.</div>';
@@ -2733,20 +2738,24 @@ function renderSameDay(bindings){
     const occ=[...p.occs].slice(0,3).join(', ')||'';
     const cou=[...p.countries].slice(0,2).join(', ')||'';
     const dod=p.dod?`<span class="sd-dod">✝ ${p.dod}</span>`:'';
-    // 한국어 위키 우선, 없으면 영문 위키, 둘 다 없으면 Wikidata
+    // 성별 박기
+    let genderTag='';
+    if(p.gender==='male'||/남|男/.test(p.gender))genderTag='<span class="sd-gender sd-male">男</span>';
+    else if(p.gender==='female'||/여|女/.test(p.gender))genderTag='<span class="sd-gender sd-female">女</span>';
+    // 한국어 위키 우선, 없으면 영문 위키
     let url, label;
     if(p.koWiki){ url=p.koWiki; label='한국어 위키'; }
     else if(p.enWiki){ url=p.enWiki; label='영문 위키'; }
     else { url=`https://www.wikidata.org/wiki/${p.pid}`; label='Wikidata'; }
     return `<div class="sd-item">
       <div>
-        <div class="sd-name">${escapeHtml(p.name)}${dod}</div>
+        <div class="sd-name">${genderTag}${escapeHtml(p.name)}${dod}</div>
         <div class="sd-meta">${escapeHtml(cou)} · ${escapeHtml(occ)}</div>
       </div>
       <a class="sd-link" href="${url}" target="_blank">${label} ↗</a>
     </div>`;
   }).join('');
-  document.getElementById('sdList').innerHTML=`<div style="margin-bottom:8px;font-size:12px;color:var(--gold-d)">총 <b>${list.length}</b>명 (사망 ${list.filter(p=>p.dod).length}명)</div>`+html;
+  document.getElementById('sdList').innerHTML=`<div style="margin-bottom:8px;font-size:12px;color:var(--gold-d)">총 <b>${list.length}</b>명 (사망 ${list.filter(p=>p.dod).length}명) · 이름 라벨 X 자리 제외</div>`+html;
 }
 
 function escapeHtml(s){

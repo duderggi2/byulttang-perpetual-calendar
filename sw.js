@@ -1,6 +1,6 @@
 // 별땅 만세력 Pro — Service Worker
 // 버전을 바꾸면 캐시가 갱신됨
-const CACHE_VERSION = 'byulddang-v1.4.4';  // 2026-05-13 — SPARQL 최적화 (503 박힘 해결)
+const CACHE_VERSION = 'byulddang-v1.4.5';  // 2026-05-13 — SPARQL 최적화 (503 박힘 해결)
 
 // 캐시할 파일 목록
 const CORE_ASSETS = [
