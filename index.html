@@ -53,6 +53,24 @@ header .sub{font-size:13px;color:var(--ts);font-weight:300}
 .wiki-go{background:var(--bg);border:1px solid var(--gold-d);color:var(--gold);border-radius:6px;padding:6px 10px;cursor:pointer;font-size:15px;font-weight:700;line-height:1;transition:all .2s}
 .wiki-go:hover{background:rgba(201,168,76,.15);color:var(--gold-l)}
 
+/* 같은 날 검색 (Wikidata) */
+.same-day-btn{background:var(--card2);border:1.5px solid var(--gold);color:var(--gold-l);border-radius:6px;padding:5px 12px;font-family:'Noto Serif KR',serif;font-size:11px;font-weight:600;cursor:pointer;margin-top:6px;transition:all .2s}
+.same-day-btn:hover{background:var(--gold);color:#fff}
+.sd-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:999;justify-content:center;align-items:center}
+.sd-modal.show{display:flex;animation:fu .3s ease}
+.sd-box{background:var(--card);border-radius:var(--r);max-width:800px;max-height:80vh;width:90%;padding:20px;overflow-y:auto;border:1.5px solid var(--gold)}
+.sd-box h3{font-family:'Noto Serif KR',serif;font-size:18px;color:var(--gold-l);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.sd-box .sd-close{cursor:pointer;background:none;border:none;font-size:22px;color:var(--ts)}
+.sd-box .sd-loading{text-align:center;padding:30px;color:var(--ts);font-size:13px}
+.sd-box .sd-list{margin-top:10px}
+.sd-box .sd-item{padding:8px 12px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center;gap:10px}
+.sd-box .sd-item:hover{background:var(--card2)}
+.sd-box .sd-name{font-weight:600;color:var(--tp);font-size:13px}
+.sd-box .sd-meta{font-size:11px;color:var(--ts)}
+.sd-box .sd-dod{color:var(--fire);font-size:10px;margin-left:4px}
+.sd-box .sd-link{color:var(--gold);text-decoration:none;font-size:11px}
+.sd-box .sd-link:hover{text-decoration:underline}
+.sd-box .sd-info{font-size:11px;color:var(--td);margin-bottom:8px;padding:6px 10px;background:var(--card2);border-radius:4px}
 /* Result */
 #result{display:none}
 #result.show{display:block;animation:fu .5s ease}
@@ -365,7 +383,7 @@ footer .fb{font-family:'Noto Serif KR',serif;color:var(--gold-d);font-size:11px}
 
 <div id="result">
 <div id="convNote" class="conv-note" style="display:none"></div>
-<div class="res-head"><div class="tit" id="resTit"></div><div class="dt" id="resDt"></div><div class="dt-sub" id="resDtSub"></div></div>
+<div class="res-head"><div class="tit" id="resTit"></div><div class="dt" id="resDt"></div><div class="dt-sub" id="resDtSub"></div><button class="same-day-btn" id="sameDayBtn" onclick="searchSameDayBirth()">★ 같은 날 태어난 사람 검색 (Wikidata)</button></div>
 
 <table class="saju-tbl" id="sajuTbl"></table>
 
@@ -2593,6 +2611,113 @@ dbInit();
   calc();
 })();
 
+// ★ 같은 날 태어난 사람 검색 (Wikidata SPARQL)
+let sameDay_currentDate=null;
+function searchSameDayBirth(){
+  // 현재 입력된 날짜 가져오기 (양력 기준)
+  const y=document.getElementById('inpYear').value;
+  const m=document.getElementById('inpMonth').value;
+  const d=document.getElementById('inpDay').value;
+  if(!y||!m||!d){alert('생년월일을 먼저 입력하세요.');return;}
+  // 양력으로 변환 — 음력이면 양력으로 변환 필요
+  // 일단 입력 그대로 양력으로 가정 (음력→양력은 사주 엔진이 하지만 여기는 단순화)
+  const yy=parseInt(y), mm=parseInt(m), dd=parseInt(d);
+  if(yy<1300||yy>2100||mm<1||mm>12||dd<1||dd>31){alert('올바른 날짜를 입력하세요.');return;}
+  showSameDayModal(yy, mm, dd);
+}
+
+function showSameDayModal(y, m, d){
+  let modal=document.getElementById('sameDayModal');
+  if(!modal){
+    modal=document.createElement('div');
+    modal.id='sameDayModal';
+    modal.className='sd-modal';
+    modal.innerHTML=`<div class="sd-box">
+      <h3>같은 날 태어난 사람 <button class="sd-close" onclick="closeSameDayModal()">×</button></h3>
+      <div class="sd-info" id="sdInfo"></div>
+      <div class="sd-loading" id="sdLoading">Wikidata에서 검색 중...</div>
+      <div class="sd-list" id="sdList"></div>
+    </div>`;
+    modal.addEventListener('click',(e)=>{if(e.target===modal)closeSameDayModal();});
+    document.body.appendChild(modal);
+  }
+  document.getElementById('sdInfo').textContent=`★ 양력 ${y}년 ${m}월 ${d}일 출생자 (Wikidata 등재 자리)`;
+  document.getElementById('sdLoading').style.display='block';
+  document.getElementById('sdList').innerHTML='';
+  modal.classList.add('show');
+  fetchSameDay(y, m, d);
+}
+
+function closeSameDayModal(){
+  document.getElementById('sameDayModal').classList.remove('show');
+}
+
+async function fetchSameDay(y, m, d){
+  const dateStr=`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}T00:00:00Z`;
+  const sparql=`SELECT ?person ?personLabel ?occupationLabel ?countryLabel ?dod ?genderLabel WHERE {
+  ?person wdt:P31 wd:Q5 ;
+          wdt:P569 ?dob .
+  FILTER(?dob = "${dateStr}"^^xsd:dateTime)
+  OPTIONAL { ?person wdt:P570 ?dod }
+  OPTIONAL { ?person wdt:P106 ?occupation }
+  OPTIONAL { ?person wdt:P27 ?country }
+  OPTIONAL { ?person wdt:P21 ?gender }
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "ko,en". }
+} LIMIT 300`;
+  const url='https://query.wikidata.org/sparql?query='+encodeURIComponent(sparql)+'&format=json';
+  try{
+    const r=await fetch(url, {headers:{'Accept':'application/sparql-results+json'}});
+    if(!r.ok){throw new Error('Wikidata 응답 오류 '+r.status);}
+    const data=await r.json();
+    renderSameDay(data.results.bindings);
+  }catch(e){
+    document.getElementById('sdLoading').textContent='검색 오류: '+e.message;
+  }
+}
+
+function renderSameDay(bindings){
+  const people={};
+  for(const b of bindings){
+    const pid=b.person.value.split('/').pop();
+    const name=b.personLabel?b.personLabel.value:pid;
+    if(!people[pid])people[pid]={pid,name,occs:new Set(),countries:new Set(),dod:'',gender:''};
+    if(b.occupationLabel)people[pid].occs.add(b.occupationLabel.value);
+    if(b.countryLabel)people[pid].countries.add(b.countryLabel.value);
+    if(b.dod)people[pid].dod=b.dod.value.substring(0,10);
+    if(b.genderLabel)people[pid].gender=b.genderLabel.value;
+  }
+  const list=Object.values(people);
+  document.getElementById('sdLoading').style.display='none';
+  if(list.length===0){
+    document.getElementById('sdList').innerHTML='<div style="padding:20px;text-align:center;color:var(--td)">Wikidata에 같은 날 등재된 인물이 없습니다.</div>';
+    return;
+  }
+  // 사망일 있는 사람 먼저 (별땅 결: 사주 ≠ 생사 검증 매체)
+  list.sort((a,b)=>{
+    if(a.dod&&!b.dod)return -1;
+    if(!a.dod&&b.dod)return 1;
+    return a.name.localeCompare(b.name);
+  });
+  const html=list.map(p=>{
+    const occ=[...p.occs].slice(0,3).join(', ')||'';
+    const cou=[...p.countries].slice(0,2).join(', ')||'';
+    const dod=p.dod?`<span class="sd-dod">✝ ${p.dod}</span>`:'';
+    const url=`https://www.wikidata.org/wiki/${p.pid}`;
+    return `<div class="sd-item">
+      <div>
+        <div class="sd-name">${escapeHtml(p.name)}${dod}</div>
+        <div class="sd-meta">${escapeHtml(cou)} · ${escapeHtml(occ)}</div>
+      </div>
+      <a class="sd-link" href="${url}" target="_blank">Wikidata ↗</a>
+    </div>`;
+  }).join('');
+  document.getElementById('sdList').innerHTML=`<div style="margin-bottom:8px;font-size:12px;color:var(--gold-d)">총 <b>${list.length}</b>명 (사망 ${list.filter(p=>p.dod).length}명)</div>`+html;
+}
+
+function escapeHtml(s){
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
 // ★ PWA: Service Worker 등록
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('./sw.js')
@@ -2602,7 +2727,7 @@ if('serviceWorker' in navigator){
 
 // ★ PWA: 인물DB 자동 로드 (3개 청크 파일에서 순차 불러오기)
 // 2026-05-12: 인물DB 버전 체크 + 자동 갱신 박힘
-const PWA_DB_VERSION='2026-05-12-40193'; // 데이터 갱신 시 이 값 바꾸면 자동 재로드
+const PWA_DB_VERSION='2026-05-13-43893'; // 데이터 갱신 시 이 값 바꾸면 자동 재로드
 (async function pwaAutoLoadDB(){
   try{
     const count=await idbCount();
