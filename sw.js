@@ -1,6 +1,6 @@
 // 별땅 만세력 Pro — Service Worker
 // 버전을 바꾸면 캐시가 갱신됨
-const CACHE_VERSION = 'byulddang-v1.4.0';  // 2026-05-13 — 같은 날 검색·43,893명·캐시 강제 갱신
+const CACHE_VERSION = 'byulddang-v1.4.1';  // 2026-05-13 — 같은 날 버튼 위치 갱신 + 캐시 강제 무효
 
 // 캐시할 파일 목록
 const CORE_ASSETS = [
