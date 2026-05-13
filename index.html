@@ -2614,15 +2614,16 @@ dbInit();
 // ★ 같은 날 태어난 사람 검색 (Wikidata SPARQL)
 let sameDay_currentDate=null;
 function searchSameDayBirth(){
-  // 현재 입력된 날짜 가져오기 (양력 기준)
-  const y=document.getElementById('inpYear').value;
-  const m=document.getElementById('inpMonth').value;
-  const d=document.getElementById('inpDay').value;
-  if(!y||!m||!d){alert('생년월일을 먼저 입력하세요.');return;}
-  // 양력으로 변환 — 음력이면 양력으로 변환 필요
-  // 일단 입력 그대로 양력으로 가정 (음력→양력은 사주 엔진이 하지만 여기는 단순화)
-  const yy=parseInt(y), mm=parseInt(m), dd=parseInt(d);
-  if(yy<1300||yy>2100||mm<1||mm>12||dd<1||dd>31){alert('올바른 날짜를 입력하세요.');return;}
+  // 사주 계산 후 박힌 양력 날짜 받기 (lastResult.sY/sM/sD)
+  if(!lastResult||lastResult.sY===undefined){
+    alert('먼저 [사주 확인하기]를 눌러 사주를 계산하세요.');
+    return;
+  }
+  const yy=lastResult.sY, mm=lastResult.sM, dd=lastResult.sD;
+  if(yy<1300||yy>2100||mm<1||mm>12||dd<1||dd>31){
+    alert('올바른 날짜가 아닙니다.');
+    return;
+  }
   showSameDayModal(yy, mm, dd);
 }
 
