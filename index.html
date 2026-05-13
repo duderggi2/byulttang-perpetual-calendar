@@ -2656,24 +2656,49 @@ function closeSameDayModal(){
 
 async function fetchSameDay(y, m, d){
   const dateStr=`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}T00:00:00Z`;
+  // P569(출생일)을 첫 줄로 박아 인덱스 활용 — 훨씬 빠름
   const sparql=`SELECT ?person ?personLabel ?occupationLabel ?countryLabel ?dod ?genderLabel WHERE {
-  ?person wdt:P31 wd:Q5 ;
-          wdt:P569 ?dob .
-  FILTER(?dob = "${dateStr}"^^xsd:dateTime)
+  ?person wdt:P569 "${dateStr}"^^xsd:dateTime ;
+          wdt:P31 wd:Q5 .
   OPTIONAL { ?person wdt:P570 ?dod }
   OPTIONAL { ?person wdt:P106 ?occupation }
   OPTIONAL { ?person wdt:P27 ?country }
   OPTIONAL { ?person wdt:P21 ?gender }
   SERVICE wikibase:label { bd:serviceParam wikibase:language "ko,en". }
-} LIMIT 300`;
+} LIMIT 200`;
   const url='https://query.wikidata.org/sparql?query='+encodeURIComponent(sparql)+'&format=json';
-  try{
-    const r=await fetch(url, {headers:{'Accept':'application/sparql-results+json'}});
-    if(!r.ok){throw new Error('Wikidata 응답 오류 '+r.status);}
-    const data=await r.json();
-    renderSameDay(data.results.bindings);
-  }catch(e){
-    document.getElementById('sdLoading').textContent='검색 오류: '+e.message;
+  // retry 박힘 — 503은 일시적 자리, 1번 재시도
+  for(let attempt=1;attempt<=2;attempt++){
+    try{
+      const controller=new AbortController();
+      const timeoutId=setTimeout(()=>controller.abort(), 45000); // 45초 timeout
+      document.getElementById('sdLoading').textContent=attempt===1?'Wikidata에서 검색 중...':'재시도 중... (Wikidata 응답 지연)';
+      const r=await fetch(url, {
+        headers:{'Accept':'application/sparql-results+json'},
+        signal:controller.signal
+      });
+      clearTimeout(timeoutId);
+      if(!r.ok){
+        if(r.status===503 && attempt===1){
+          await new Promise(rs=>setTimeout(rs, 2000)); // 2초 대기 후 재시도
+          continue;
+        }
+        throw new Error('Wikidata 응답 오류 '+r.status);
+      }
+      const data=await r.json();
+      renderSameDay(data.results.bindings);
+      return;
+    }catch(e){
+      if(e.name==='AbortError'){
+        if(attempt===1){ await new Promise(rs=>setTimeout(rs, 1000)); continue; }
+        document.getElementById('sdLoading').textContent='시간 초과 — Wikidata가 응답하지 않습니다. 잠시 후 다시 시도해 주세요.';
+        return;
+      }
+      if(attempt===2){
+        document.getElementById('sdLoading').innerHTML='검색 오류: '+e.message+'<br><br><a href="https://query.wikidata.org/" target="_blank" style="color:var(--gold);font-size:11px">Wikidata Query Service에서 직접 검색 ↗</a>';
+        return;
+      }
+    }
   }
 }
 
