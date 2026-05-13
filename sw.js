@@ -1,6 +1,6 @@
 // 별땅 만세력 Pro — Service Worker
 // 버전을 바꾸면 캐시가 갱신됨
-const CACHE_VERSION = 'byulddang-v1.3.0';  // 2026-05-12 — 인물DB 40,193명 갱신
+const CACHE_VERSION = 'byulddang-v1.4.0';  // 2026-05-13 — 같은 날 검색·43,893명·캐시 강제 갱신
 
 // 캐시할 파일 목록
 const CORE_ASSETS = [
@@ -11,7 +11,7 @@ const CORE_ASSETS = [
 ];
 
 // 인물DB는 별도 캐시 (크기가 크므로 분리)
-const DB_CACHE = 'byulddang-db-v2-40193';  // 2026-05-12 — 40,193명 박힘
+const DB_CACHE = 'byulddang-db-v3-43893';  // 2026-05-13 — 43,893명 박힘
 const DB_CHUNKS = [
   './db_chunk_1.json',
   './db_chunk_2.json',
@@ -59,7 +59,7 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
-  // 외부 API 요청 (위키백과 등)은 네트워크 우선
+  // 외부 API 요청 (위키백과·wikidata 등)은 네트워크 우선
   if (url.origin !== self.location.origin) {
     event.respondWith(
       fetch(event.request).catch(() => {
@@ -80,7 +80,7 @@ self.addEventListener('fetch', event => {
         // 정상 응답이면 캐시에 저장
         if (response.ok) {
           const clone = response.clone();
-          const cacheName = event.request.url.includes('인물DB') ? DB_CACHE : CACHE_VERSION;
+          const cacheName = event.request.url.includes('db_chunk') ? DB_CACHE : CACHE_VERSION;
           caches.open(cacheName).then(cache => cache.put(event.request, clone));
         }
         return response;
