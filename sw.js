@@ -1,6 +1,6 @@
 // 별땅 만세력 Pro — Service Worker
 // 버전을 바꾸면 캐시가 갱신됨
-const CACHE_VERSION = 'byulddang-v1.4.2';  // 2026-05-13 — SPARQL 최적화 (503 박힘 해결)
+const CACHE_VERSION = 'byulddang-v1.4.3';  // 2026-05-13 — SPARQL 최적화 (503 박힘 해결)
 
 // 캐시할 파일 목록
 const CORE_ASSETS = [
@@ -59,16 +59,9 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
-  // 외부 API 요청 (위키백과·wikidata 등)은 네트워크 우선
+  // 외부 API 요청 (위키백과·wikidata 등)은 가로채지 않음
+  // — 브라우저가 직접 처리 (SW 통과 시 timeout 자리에서 SW가 503 만드는 자리 박힘)
   if (url.origin !== self.location.origin) {
-    event.respondWith(
-      fetch(event.request).catch(() => {
-        return new Response('오프라인 상태에서는 외부 검색이 불가합니다.', {
-          status: 503,
-          headers: { 'Content-Type': 'text/plain; charset=utf-8' }
-        });
-      })
-    );
     return;
   }
 
