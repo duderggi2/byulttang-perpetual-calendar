@@ -2819,55 +2819,66 @@ if('serviceWorker' in navigator){
 }
 
 // ★ PWA: 인물DB 자동 로드 (3개 청크 파일에서 순차 불러오기)
-// 2026-05-12: 인물DB 버전 체크 + 자동 갱신 박힘
+// 2026-05-14: 인물DB 버전 체크 + 자동 갱신 박힘
 const PWA_DB_VERSION='2026-05-14-44517-4dim'; // 데이터 갱신 시 이 값 바꾸면 자동 재로드
+const PWA_DB_VERSION_KEY='byulddang_db_version';
+const DB_CHUNK_URLS=['./db_chunk_1.json','./db_chunk_2.json','./db_chunk_3.json'];
+
+async function checkAndUpdateDB(){
+  await idbOpen();
+  const count=await idbCount();
+  const storedVer=localStorage.getItem(PWA_DB_VERSION_KEY);
+  if(storedVer===PWA_DB_VERSION && count>0){
+    console.log('[PWA] DB 버전 일치:',PWA_DB_VERSION,'·',count,'명');
+    return false;
+  }
+  console.log('[PWA] 새 DB 박힘:',PWA_DB_VERSION,'(옛:',storedVer||'없음',')');
+  
+  // 사용자가 박은 자리 보존 (source 자국 X 자리)
+  const all=await idbAll();
+  const toKeep=all.filter(p => !p.source || p.source==='user' || p.source==='');
+  console.log('[PWA] 사용자 박은 자리 보존:',toKeep.length,'명');
+  
+  // IDB 전체 비우기
+  await idbClearAll();
+  
+  // 사용자 자리 복원
+  for(const p of toKeep){
+    try{await idbPut(p);}catch(e){}
+  }
+  
+  // 청크 받아 IDB에 박기
+  let totalLoaded=0;
+  for(const chunkUrl of DB_CHUNK_URLS){
+    try{
+      const resp=await fetch(chunkUrl);
+      if(!resp.ok){console.warn('[PWA] 청크 X:',chunkUrl);continue;}
+      const chunk=await resp.json();
+      for(const p of chunk){
+        try{await idbPut(p);totalLoaded++;}catch(e){}
+      }
+      console.log('[PWA] 청크 박힘:',chunkUrl,'→',chunk.length,'명');
+    }catch(e){
+      console.warn('[PWA] 청크 받기 실패:',chunkUrl,e);
+    }
+  }
+  
+  localStorage.setItem(PWA_DB_VERSION_KEY,PWA_DB_VERSION);
+  console.log('[PWA] DB 자동 갱신 완료:',totalLoaded,'명 박힘');
+  return true;
+}
+
 (async function pwaAutoLoadDB(){
   try{
-    const count=await idbCount();
-    const storedVer=localStorage.getItem('byulddang_db_version');
-    if(count>0 && storedVer===PWA_DB_VERSION){
-      console.log(`[PWA] 인물DB 이미 로드됨: ${count}명 (버전 ${storedVer})`);
-      return;
+    const updated=await checkAndUpdateDB();
+    if(updated){
+      await dbUpdateCount();
+      if(typeof dbRender==='function') await dbRender();
     }
-    if(count>0 && storedVer!==PWA_DB_VERSION){
-      console.log(`[PWA] 인물DB 버전 변경 감지 (${storedVer||'없음'}→${PWA_DB_VERSION}). 초기화 후 재로드.`);
-      const db=await idbOpen();
-      const tx=db.transaction('persons','readwrite');
-      tx.objectStore('persons').clear();
-      await new Promise(r=>tx.oncomplete=r);
-    }
-    console.log('[PWA] 인물DB 자동 로드 시작...');
-    // 로딩 표시
-    const prog=document.createElement('div');
-    prog.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--card);border:2px solid var(--gold);border-radius:12px;padding:24px;z-index:9999;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.3);min-width:280px';
-    prog.innerHTML='<div style="font-size:14px;color:var(--gold);margin-bottom:8px">인물DB 로드 중... (최초 1회)</div><div id="pwaLoadProg" style="font-size:12px;color:var(--ts)">준비 중...</div>';
-    document.body.appendChild(prog);
-    const DB_CHUNKS=['./db_chunk_1.json','./db_chunk_2.json','./db_chunk_3.json'];
-    let totalLoaded=0;
-    for(let ci=0;ci<DB_CHUNKS.length;ci++){
-      document.getElementById('pwaLoadProg').textContent=`파일 ${ci+1}/${DB_CHUNKS.length} 다운로드 중...`;
-      const resp=await fetch(DB_CHUNKS[ci]);
-      if(!resp.ok) throw new Error(DB_CHUNKS[ci]+' 없음: '+resp.status);
-      const arr=await resp.json();
-      if(!Array.isArray(arr)) throw new Error('DB 형식 오류');
-      const BATCH=500;
-      for(let i=0;i<arr.length;i+=BATCH){
-        const batch=arr.slice(i,i+BATCH);
-        await idbAddBulk(batch);
-        totalLoaded+=batch.length;
-        document.getElementById('pwaLoadProg').textContent=`${totalLoaded}명 로드 완료 (${ci+1}/${DB_CHUNKS.length})`;
-        await new Promise(r=>setTimeout(r,0));
-      }
-    }
-    document.body.removeChild(prog);
-    await dbRender();
-    localStorage.setItem('byulddang_db_version', PWA_DB_VERSION);
-    console.log(`[PWA] 인물DB 자동 로드 완료: ${totalLoaded}명 (버전 ${PWA_DB_VERSION})`);
   }catch(e){
-    console.log('[PWA] 인물DB 자동 로드 건너뜀:', e.message);
+    console.warn('[PWA] DB 자동 로드 실패:',e);
   }
 })();
 </script>
 </body>
 </html>
-                                                                                                                                                                                                                                                                                                                                                                                                             
