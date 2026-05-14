@@ -2790,8 +2790,13 @@ function escapeHtml(s){
 
 // ★ PWA: Service Worker 등록
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('./sw.js')
-    .then(reg=>console.log('[PWA] Service Worker 등록 완료:', reg.scope))
+  // updateViaCache: 'none' — SW 자체는 항상 네트워크에서 박음 (캐시 X)
+  navigator.serviceWorker.register('./sw.js', {updateViaCache: 'none'})
+    .then(reg=>{
+      console.log('[PWA] Service Worker 등록 완료:', reg.scope);
+      // 페이지 로드 시 새 SW 박혔는지 확인
+      reg.update();
+    })
     .catch(err=>console.warn('[PWA] Service Worker 등록 실패:', err));
 }
 
