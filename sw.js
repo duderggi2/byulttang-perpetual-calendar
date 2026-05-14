@@ -1,6 +1,6 @@
 // 별땅 만세력 Pro — Service Worker
 // 버전을 바꾸면 캐시가 갱신됨
-const CACHE_VERSION = 'byulddang-v1.5.1';  // 2026-05-13 — SPARQL 최적화 (503 박힘 해결)
+const CACHE_VERSION = 'byulddang-v1.7.0';  // 2026-05-13 — SPARQL 최적화 (503 박힘 해결)
 
 // 캐시할 파일 목록
 const CORE_ASSETS = [
@@ -11,7 +11,7 @@ const CORE_ASSETS = [
 ];
 
 // 인물DB는 별도 캐시 (크기가 크므로 분리)
-const DB_CACHE = 'byulddang-db-v3-43893';  // 2026-05-13 — 43,893명 박힘
+const DB_CACHE = 'byulddang-db-v5-44517';  // 2026-05-13 — 43,893명 박힘
 const DB_CHUNKS = [
   './db_chunk_1.json',
   './db_chunk_2.json',
