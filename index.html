@@ -491,12 +491,12 @@ footer .fb{font-family:'Noto Serif KR',serif;color:var(--gold-d);font-size:11px}
   <label class="leap-chk" id="leapRow"><input type="checkbox" id="leapMonth">윤달</label>
 </div>
 <div class="inp-row" style="margin-top:6px">
-  <div class="fg" style="flex:1"><label>년주: 사회적 호칭</label><input type="text" id="pjob" placeholder="예: 한국의 배우, 미국의 정치인"></div>
-  <div class="fg" style="flex:1"><label>월주: 전문 능력</label><input type="text" id="pmonthTrait" placeholder="예: 로맨스 영화 감독"></div>
+  <div class="fg" style="flex:1"><label>년주: 사회적 호칭</label><input type="text" id="pjob" placeholder=""></div>
+  <div class="fg" style="flex:1"><label>월주: 전문 능력</label><input type="text" id="pmonthTrait" placeholder=""></div>
 </div>
 <div class="inp-row" style="margin-top:6px">
-  <div class="fg" style="flex:1"><label>일주: 가족·취향</label><input type="text" id="pdayTrait" placeholder="예: 결혼 3회·자녀 2"></div>
-  <div class="fg" style="flex:1"><label>키워드/특이사항</label><input type="text" id="pkeyword" placeholder="예: 테슬라CEO"></div>
+  <div class="fg" style="flex:1"><label>일주: 가족·취향</label><input type="text" id="pdayTrait" placeholder=""></div>
+  <div class="fg" style="flex:1"><label>키워드/특이사항</label><input type="text" id="pkeyword" placeholder=""></div>
 </div>
 <div class="inp-row">
   <div class="fg" style="flex:1"><label>나무위키/참고 URL</label><div style="display:flex;gap:4px"><input type="text" id="pwiki" placeholder="https://namu.wiki/w/..." style="flex:1"><button class="wiki-go" onclick="openWiki()" title="새 창으로 열기">↗</button></div></div>
@@ -2802,7 +2802,7 @@ if('serviceWorker' in navigator){
 
 // ★ PWA: 인물DB 자동 로드 (3개 청크 파일에서 순차 불러오기)
 // 2026-05-14: 인물DB 버전 체크 + 자동 갱신 박힘
-const PWA_DB_VERSION='2026-05-14-44517-4dim-v3'; // 데이터 갱신 시 이 값 바꾸면 자동 재로드
+const PWA_DB_VERSION='2026-05-14-44517-v4'; // 데이터 갱신 시 이 값 바꾸면 자동 재로드
 const PWA_DB_VERSION_KEY='byulddang_db_version';
 const DB_CHUNK_URLS=['./db_chunk_1.json','./db_chunk_2.json','./db_chunk_3.json'];
 
