@@ -386,13 +386,7 @@ footer .fb{font-family:'Noto Serif KR',serif;color:var(--gold-d);font-size:11px}
 
 <div id="result">
 <div id="convNote" class="conv-note" style="display:none"></div>
-<div class="res-head"><div class="tit" id="resTit"></div>
-<div id="resTraits" style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:14px 20px;margin-bottom:20px;display:none;font-size:12px;line-height:1.6">
-  <div id="trYear" style="color:var(--ts);margin-bottom:4px"></div>
-  <div id="trMonth" style="color:var(--ts);margin-bottom:4px"></div>
-  <div id="trDay" style="color:var(--ts);margin-bottom:4px"></div>
-  <div id="trSpecial" style="color:var(--gold-l)"></div>
-</div><div class="dt" id="resDt"></div><div class="dt-sub" id="resDtSub"></div></div>
+<div class="res-head"><div class="tit" id="resTit"></div><div class="dt" id="resDt"></div><div class="dt-sub" id="resDtSub"></div></div>
 
 <table class="saju-tbl" id="sajuTbl"></table>
 
@@ -1457,24 +1451,7 @@ function render(R){
   const ds=`양력 ${sY}.${sM}.${sD} (${dayOfWeek}) ${hs}` + (lunarStr?` · ${lunarStr}`:'');
   document.getElementById('resDt').textContent=ds;
   document.getElementById('resDtSub').textContent='';
-  try {
-    var __yT=(document.getElementById('pjob')||{}).value||'';
-    var __mT=(document.getElementById('pmonthTrait')||{}).value||'';
-    var __dT=(document.getElementById('pdayTrait')||{}).value||'';
-    var __sN=(document.getElementById('pkeyword')||{}).value||'';
-    var __box=document.getElementById('resTraits');
-    if(__box){
-      if(__yT||__mT||__dT||__sN){
-        document.getElementById('trYear').textContent=__yT?('🌐 년주 · '+__yT):'';
-        document.getElementById('trMonth').textContent=__mT?('💼 월주 · '+__mT):'';
-        document.getElementById('trDay').textContent=__dT?('🏠 일주 · '+__dT):'';
-        document.getElementById('trSpecial').textContent=__sN?('✦ '+__sN):'';
-        __box.style.display='block';
-      } else {
-        __box.style.display='none';
-      }
-    }
-  } catch(e){}
+
   
   // Pillars array: [시,일,월,연]
   const ps=[{l:'시주',d:hP},{l:'일주',d:dP},{l:'월주',d:mP},{l:'연주',d:yP}];
@@ -2820,7 +2797,7 @@ if('serviceWorker' in navigator){
 
 // ★ PWA: 인물DB 자동 로드 (3개 청크 파일에서 순차 불러오기)
 // 2026-05-14: 인물DB 버전 체크 + 자동 갱신 박힘
-const PWA_DB_VERSION='2026-05-14-44517-4dim'; // 데이터 갱신 시 이 값 바꾸면 자동 재로드
+const PWA_DB_VERSION='2026-05-14-44517-4dim-v2'; // 데이터 갱신 시 이 값 바꾸면 자동 재로드
 const PWA_DB_VERSION_KEY='byulddang_db_version';
 const DB_CHUNK_URLS=['./db_chunk_1.json','./db_chunk_2.json','./db_chunk_3.json'];
 
