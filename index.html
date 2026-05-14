@@ -389,6 +389,12 @@ footer .fb{font-family:'Noto Serif KR',serif;color:var(--gold-d);font-size:11px}
 <div id="result">
 <div id="convNote" class="conv-note" style="display:none"></div>
 <div class="res-head"><div class="tit" id="resTit"></div><div class="dt" id="resDt"></div><div class="dt-sub" id="resDtSub"></div></div>
+<div id="resTraits" style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:10px 16px;margin-bottom:14px;display:none;font-size:11.5px;line-height:1.55">
+  <div id="trYear" style="color:var(--ts);margin-bottom:3px"></div>
+  <div id="trMonth" style="color:var(--ts);margin-bottom:3px"></div>
+  <div id="trDay" style="color:var(--ts);margin-bottom:3px"></div>
+  <div id="trSpecial" style="color:var(--gold-l)"></div>
+</div>
 
 <table class="saju-tbl" id="sajuTbl"></table>
 
@@ -1453,6 +1459,20 @@ function render(R){
   const ds=`양력 ${sY}.${sM}.${sD} (${dayOfWeek}) ${hs}` + (lunarStr?` · ${lunarStr}`:'');
   document.getElementById('resDt').textContent=ds;
   document.getElementById('resDtSub').textContent='';
+  // 4차원 자국 박기 (인물DB에서 박은 자국 있으면)
+  try {
+    var __t = window._pendingTraits;
+    var __box = document.getElementById('resTraits');
+    if (__t && __box && (__t.yearTrait || __t.monthTrait || __t.dayTrait || __t.specialNote)) {
+      document.getElementById('trYear').textContent = __t.yearTrait ? ('🌐 ' + __t.yearTrait) : '';
+      document.getElementById('trMonth').textContent = __t.monthTrait ? ('💼 ' + __t.monthTrait) : '';
+      document.getElementById('trDay').textContent = __t.dayTrait ? ('🏠 ' + __t.dayTrait) : '';
+      document.getElementById('trSpecial').textContent = __t.specialNote ? ('✦ ' + __t.specialNote) : '';
+      __box.style.display = 'block';
+    } else if (__box) {
+      __box.style.display = 'none';
+    }
+  } catch(e){}
 
   
   // Pillars array: [시,일,월,연]
@@ -2047,6 +2067,13 @@ async function dbLoadEntry(id){
   document.getElementById('btnUpdate').style.display='';
   document.getElementById('editIndicator').style.display='';
   document.getElementById('editName').textContent=e.name||'';
+  // 사주 결과 자리에 4차원 자국 박기 (calc 후 표시)
+  window._pendingTraits = {
+    yearTrait: e.yearTrait || e.job || '',
+    monthTrait: e.monthTrait || '',
+    dayTrait: e.dayTrait || '',
+    specialNote: e.specialNote || e.keyword || ''
+  };
   calc();
 }
 
@@ -2814,7 +2841,7 @@ if('serviceWorker' in navigator){
 
 // ★ PWA: 인물DB 자동 로드 (3개 청크 파일에서 순차 불러오기)
 // 2026-05-14: 인물DB 버전 체크 + 자동 갱신 박힘
-const PWA_DB_VERSION='2026-05-14-44517-v6'; // 데이터 갱신 시 이 값 바꾸면 자동 재로드
+const PWA_DB_VERSION='2026-05-14-44517-v7'; // 데이터 갱신 시 이 값 바꾸면 자동 재로드
 const PWA_DB_VERSION_KEY='byulddang_db_version';
 const DB_CHUNK_URLS=['./db_chunk_1.json','./db_chunk_2.json','./db_chunk_3.json'];
 
