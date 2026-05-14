@@ -386,7 +386,13 @@ footer .fb{font-family:'Noto Serif KR',serif;color:var(--gold-d);font-size:11px}
 
 <div id="result">
 <div id="convNote" class="conv-note" style="display:none"></div>
-<div class="res-head"><div class="tit" id="resTit"></div><div class="dt" id="resDt"></div><div class="dt-sub" id="resDtSub"></div></div>
+<div class="res-head"><div class="tit" id="resTit"></div>
+<div id="resTraits" style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:14px 20px;margin-bottom:20px;display:none;font-size:12px;line-height:1.6">
+  <div id="trYear" style="color:var(--ts);margin-bottom:4px"></div>
+  <div id="trMonth" style="color:var(--ts);margin-bottom:4px"></div>
+  <div id="trDay" style="color:var(--ts);margin-bottom:4px"></div>
+  <div id="trSpecial" style="color:var(--gold-l)"></div>
+</div><div class="dt" id="resDt"></div><div class="dt-sub" id="resDtSub"></div></div>
 
 <table class="saju-tbl" id="sajuTbl"></table>
 
@@ -491,8 +497,12 @@ footer .fb{font-family:'Noto Serif KR',serif;color:var(--gold-d);font-size:11px}
   <label class="leap-chk" id="leapRow"><input type="checkbox" id="leapMonth">윤달</label>
 </div>
 <div class="inp-row" style="margin-top:6px">
-  <div class="fg" style="flex:1"><label>직업/분야</label><input type="text" id="pjob" placeholder="예: 기업인, 배우, 정치인"></div>
-  <div class="fg" style="flex:1"><label>키워드/특이사항</label><input type="text" id="pkeyword" placeholder="예: 테슬라CEO, 화성이주"></div>
+  <div class="fg" style="flex:1"><label>년주: 사회적 호칭</label><input type="text" id="pjob" placeholder="예: 한국의 배우, 미국의 정치인"></div>
+  <div class="fg" style="flex:1"><label>월주: 전문 능력</label><input type="text" id="pmonthTrait" placeholder="예: 로맨스 영화 감독"></div>
+</div>
+<div class="inp-row" style="margin-top:6px">
+  <div class="fg" style="flex:1"><label>일주: 가족·취향</label><input type="text" id="pdayTrait" placeholder="예: 결혼 3회·자녀 2"></div>
+  <div class="fg" style="flex:1"><label>키워드/특이사항</label><input type="text" id="pkeyword" placeholder="예: 테슬라CEO"></div>
 </div>
 <div class="inp-row">
   <div class="fg" style="flex:1"><label>나무위키/참고 URL</label><div style="display:flex;gap:4px"><input type="text" id="pwiki" placeholder="https://namu.wiki/w/..." style="flex:1"><button class="wiki-go" onclick="openWiki()" title="새 창으로 열기">↗</button></div></div>
@@ -1447,6 +1457,24 @@ function render(R){
   const ds=`양력 ${sY}.${sM}.${sD} (${dayOfWeek}) ${hs}` + (lunarStr?` · ${lunarStr}`:'');
   document.getElementById('resDt').textContent=ds;
   document.getElementById('resDtSub').textContent='';
+  try {
+    var __yT=(document.getElementById('pjob')||{}).value||'';
+    var __mT=(document.getElementById('pmonthTrait')||{}).value||'';
+    var __dT=(document.getElementById('pdayTrait')||{}).value||'';
+    var __sN=(document.getElementById('pkeyword')||{}).value||'';
+    var __box=document.getElementById('resTraits');
+    if(__box){
+      if(__yT||__mT||__dT||__sN){
+        document.getElementById('trYear').textContent=__yT?('🌐 년주 · '+__yT):'';
+        document.getElementById('trMonth').textContent=__mT?('💼 월주 · '+__mT):'';
+        document.getElementById('trDay').textContent=__dT?('🏠 일주 · '+__dT):'';
+        document.getElementById('trSpecial').textContent=__sN?('✦ '+__sN):'';
+        __box.style.display='block';
+      } else {
+        __box.style.display='none';
+      }
+    }
+  } catch(e){}
   
   // Pillars array: [시,일,월,연]
   const ps=[{l:'시주',d:hP},{l:'일주',d:dP},{l:'월주',d:mP},{l:'연주',d:yP}];
@@ -1860,8 +1888,12 @@ async function dbUpdateCount(){
 async function dbSave(){
   if(!lastResult){alert('먼저 사주를 확인하세요.');return;}
   const name=document.getElementById('pname').value||'이름없음';
-  const job=document.getElementById('pjob').value||'';
-  const keyword=document.getElementById('pkeyword').value||'';
+  const yearTrait=document.getElementById('pjob').value||'';
+  const monthTrait=(document.getElementById('pmonthTrait')||{}).value||'';
+  const dayTrait=(document.getElementById('pdayTrait')||{}).value||'';
+  const specialNote=document.getElementById('pkeyword').value||'';
+  const job=yearTrait;
+  const keyword=specialNote;
   const wiki=document.getElementById('pwiki').value||'';
   const R=lastResult;
   const all=await idbAll();
@@ -1873,6 +1905,7 @@ async function dbSave(){
     gender:R.gender==='male'?'M':'F',
     calType:R.calType||'solar',
     hourUnknown:R.h<0,
+    yearTrait, monthTrait, dayTrait, specialNote,
     job,keyword,namuUrl:wiki,
     chart:{ys:R.yP.s,yb:R.yP.b,mStem:R.mP.s,mBranch:R.mP.b,ds:R.dP.s,db:R.dP.b,
       hs:R.hP?R.hP.s:null,hb:R.hP?R.hP.b:null}
@@ -1934,6 +1967,8 @@ function clearEdit(){
   document.getElementById('editIndicator').style.display='none';
   document.getElementById('editName').textContent='';
   document.getElementById('pjob').value='';
+  var _pmt=document.getElementById('pmonthTrait'); if(_pmt) _pmt.value='';
+  var _pdt=document.getElementById('pdayTrait'); if(_pdt) _pdt.value='';
   document.getElementById('pkeyword').value='';
   document.getElementById('pwiki').value='';
 }
@@ -1975,7 +2010,12 @@ function dbRenderPage(){
     const saju=c.ds!==undefined?`${SH[c.ys]}${BH[c.yb]} ${SH[c.mStem]}${BH[c.mBranch]} ${SH[c.ds]}${BH[c.db]}${c.hs!==null&&c.hs!==undefined?' '+SH[c.hs]+BH[c.hb]:''}` :'';
     const cal=(e.calType==='lunar'||e.cal==='lunar')?'음':'양';
     const gd=e.gender==='M'||e.gender==='남'||e.gender==='male'?'M':e.gender==='F'||e.gender==='여'||e.gender==='female'?'F':e.gender||'';
-    const extra=[(e.job||''),(e.keyword||'')].filter(x=>x).join(' · ');
+    var _traits=[];
+    if(e.yearTrait||e.job) _traits.push('🌐'+(e.yearTrait||e.job));
+    if(e.monthTrait) _traits.push('💼'+e.monthTrait);
+    if(e.dayTrait) _traits.push('🏠'+e.dayTrait);
+    if(e.specialNote||e.keyword) _traits.push('✦'+(e.specialNote||e.keyword));
+    const extra=_traits.join(' · ');
     const namuLink=e.namuUrl||e.wikiUrl||e.wiki||(e.name?'https://namu.wiki/w/'+encodeURIComponent(e.name):'');
     const inCmp=cmpList.some(x=>x.id===e.id);
     return `<div class="db-item" onclick="dbLoadEntry(${e.id})">
@@ -2006,8 +2046,10 @@ async function dbLoadEntry(id){
   document.getElementById('day').value=e.day;
   document.getElementById('hour').value=e.hourUnknown?-1:(e.hour!=null?e.hour:0);
   document.getElementById('pname').value=e.name||'';
-  document.getElementById('pjob').value=e.job||'';
-  document.getElementById('pkeyword').value=e.keyword||'';
+  document.getElementById('pjob').value=e.yearTrait||e.job||'';
+  var _pmt2=document.getElementById('pmonthTrait'); if(_pmt2) _pmt2.value=e.monthTrait||'';
+  var _pdt2=document.getElementById('pdayTrait'); if(_pdt2) _pdt2.value=e.dayTrait||'';
+  document.getElementById('pkeyword').value=e.specialNote||e.keyword||'';
   const namuVal=e.namuUrl||e.wikiUrl||e.wiki||(e.name?'https://namu.wiki/w/'+encodeURIComponent(e.name):'');
   document.getElementById('pwiki').value=namuVal;
   const isLunar=(e.calType==='lunar'||e.cal==='lunar');
@@ -2372,7 +2414,12 @@ async function seSearch(){
         const saju=c.ds!==undefined?`${SH[c.ds]}${BH[c.db]}`:'';
         const cal=(e.calType==='lunar'||e.cal==='lunar')?'음력':'양력';
         const gStr=e.gender==='F'||e.gender==='여'?'여':'남';
-        const extra=[(e.job||''),(e.keyword||'')].filter(x=>x).join(' · ');
+        var _traits=[];
+    if(e.yearTrait||e.job) _traits.push('🌐'+(e.yearTrait||e.job));
+    if(e.monthTrait) _traits.push('💼'+e.monthTrait);
+    if(e.dayTrait) _traits.push('🏠'+e.dayTrait);
+    if(e.specialNote||e.keyword) _traits.push('✦'+(e.specialNote||e.keyword));
+    const extra=_traits.join(' · ');
         html+=`<div class="se-item" onclick="dbLoadEntry(${e.id})">
           <div class="se-item-head">
             <span class="se-item-name">${e.name||'이름없음'}</span>
@@ -2823,3 +2870,4 @@ const PWA_DB_VERSION='2026-05-14-44517-4dim'; // 데이터 갱신 시 이 값 �
 </script>
 </body>
 </html>
+                                                                                                                                                                                                                                                                                                                                                                                                             
