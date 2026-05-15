@@ -1393,7 +1393,7 @@ function recentRender(){
     </div>`;
   }).join('');
 }
-function recentLoadEntry(idx){
+async function recentLoadEntry(idx){
   const arr=recentLoad();
   const e=arr[idx]; if(!e)return;
   // 클릭 즉시 맨 위로 (calc의 setTimeout 대기 없이 선제적으로)
@@ -1433,6 +1433,24 @@ function recentLoadEntry(idx){
     dayTrait: e.dayTrait || '',
     specialNote: e.keyword || ''
   };
+  // 인물DB에 같은 자리(이름+생년월일+성별)가 있으면 수정 모드 자동 진입
+  try {
+    const allDb = await idbAll();
+    const eName = (e.name === '(이름없음)' ? '' : (e.name||''));
+    const eGender = e.gender || 'M';
+    const matched = allDb.find(x => {
+      const xName = (x.name || '').replace(/\(~\d{4}년\)/,'').replace(/\(~생존 중\)/,'').trim();
+      const xGender = (x.gender==='M'||x.gender==='남'||x.gender==='male') ? 'M'
+                    : (x.gender==='F'||x.gender==='여'||x.gender==='female') ? 'F' : 'M';
+      return xName === eName && x.year === e.year && x.month === e.month && x.day === e.day && xGender === eGender;
+    });
+    if (matched) {
+      editingId = matched.id;
+      document.getElementById('btnUpdate').style.display = '';
+      document.getElementById('editIndicator').style.display = '';
+      document.getElementById('editName').textContent = matched.name;
+    }
+  } catch(err) { console.warn('인물DB 매칭 실패', err); }
   calc(); // calc 내부에서 렌더 후 자동으로 scrollTo(0) 실행됨
 }
 function recentRemove(idx){
