@@ -1436,14 +1436,37 @@ async function recentLoadEntry(idx){
   // 인물DB에 같은 자리(이름+생년월일+성별)가 있으면 수정 모드 자동 진입
   try {
     const allDb = await idbAll();
-    const eName = (e.name === '(이름없음)' ? '' : (e.name||''));
-    const eGender = e.gender || 'M';
-    const matched = allDb.find(x => {
-      const xName = (x.name || '').replace(/\(~\d{4}년\)/,'').replace(/\(~생존 중\)/,'').trim();
-      const xGender = (x.gender==='M'||x.gender==='남'||x.gender==='male') ? 'M'
-                    : (x.gender==='F'||x.gender==='여'||x.gender==='female') ? 'F' : 'M';
+    // 이름 정리 — 괄호 자국·공백 다 떼기
+    const cleanName = s => (s||'')
+      .replace(/\(~\d{4}년\)/g,'')
+      .replace(/\(~생존 중\)/g,'')
+      .replace(/\s+/g,' ')
+      .trim();
+    const eName = e.name === '(이름없음)' ? '' : cleanName(e.name);
+    const eGender = (e.gender==='F'||e.gender==='여'||e.gender==='female') ? 'F' : 'M';
+    let matched = null;
+    // 1순위: 이름 + y/m/d + 성별 모두 동일
+    matched = allDb.find(x => {
+      const xName = cleanName(x.name);
+      const xGender = (x.gender==='F'||x.gender==='여'||x.gender==='female') ? 'F' : 'M';
       return xName === eName && x.year === e.year && x.month === e.month && x.day === e.day && xGender === eGender;
     });
+    // 2순위: 이름 + y/m/d 동일 (성별 정보 없을 때를 위한 안전망)
+    if (!matched && eName) {
+      matched = allDb.find(x => cleanName(x.name) === eName && x.year === e.year && x.month === e.month && x.day === e.day);
+    }
+    console.log('[recent→DB 매칭]', `"${eName}"`, e.year+'/'+e.month+'/'+e.day, eGender,
+                '→', matched ? `O id=${matched.id} name="${matched.name}"` : 'X 못 찾음',
+                `| DB 전체 ${allDb.length}명`);
+    // 매칭 실패 시 비슷한 자국 찾아 짚기
+    if (!matched && eName) {
+      const partial = allDb.filter(x => cleanName(x.name).includes(eName) || eName.includes(cleanName(x.name)));
+      if (partial.length) {
+        console.log('  ↳ 같은 이름 자국:', partial.slice(0,5).map(x=>({
+          id:x.id, name:x.name, y:x.year, m:x.month, d:x.day, g:x.gender
+        })));
+      }
+    }
     if (matched) {
       editingId = matched.id;
       document.getElementById('btnUpdate').style.display = '';
