@@ -1349,6 +1349,8 @@ function recentAddFromCurrent(){
   const R=lastResult;
   const name=(document.getElementById('pname').value||'').trim();
   const job=(document.getElementById('pjob').value||'').trim();
+  const monthTrait=(document.getElementById('pmonthTrait')?.value||'').trim();
+  const dayTrait=(document.getElementById('pdayTrait')?.value||'').trim();
   const keyword=(document.getElementById('pkeyword').value||'').trim();
   const namuUrl=(document.getElementById('pwiki').value||'').trim();
   const entry={
@@ -1357,7 +1359,7 @@ function recentAddFromCurrent(){
     hour:R.h>=0?R.h:null, hourUnknown:R.h<0,
     gender:R.gender==='male'?'M':'F',
     calType:R.calType||'solar',
-    job, keyword, namuUrl,
+    job, monthTrait, dayTrait, keyword, namuUrl,
     dju:(SH[R.dP.s]||'')+(BH[R.dP.b]||''),
     ts:Date.now()
   };
@@ -1396,22 +1398,41 @@ function recentLoadEntry(idx){
   const e=arr[idx]; if(!e)return;
   // 클릭 즉시 맨 위로 (calc의 setTimeout 대기 없이 선제적으로)
   window.scrollTo(0,0);
+  // 편집 모드는 먼저 해제 (clearEdit이 입력칸을 비우므로, 값 박기 전에 호출)
+  if(typeof clearEdit==='function')clearEdit();
+  // 생년월일시
   document.getElementById('year').value=e.year;
   document.getElementById('month').value=e.month;
   document.getElementById('day').value=e.day;
   document.getElementById('hour').value=e.hourUnknown||e.hour==null?-1:e.hour;
+  // 이름·4칸·나무위키 URL
   document.getElementById('pname').value=e.name==='(이름없음)'?'':(e.name||'');
   document.getElementById('pjob').value=e.job||'';
+  var _pmt3=document.getElementById('pmonthTrait'); if(_pmt3) _pmt3.value=e.monthTrait||'';
+  var _pdt3=document.getElementById('pdayTrait'); if(_pdt3) _pdt3.value=e.dayTrait||'';
   document.getElementById('pkeyword').value=e.keyword||'';
   document.getElementById('pwiki').value=e.namuUrl||e.wikiUrl||'';
+  // 음/양력 + 성별
   const isLunar=e.calType==='lunar';
   if(isLunar)setCal('lunar',document.querySelectorAll('.cal-tog button')[1]);
   else setCal('solar',document.querySelectorAll('.cal-tog button')[0]);
   const isFemale=e.gender==='F';
   if(isFemale)setG('female',document.querySelectorAll('.g-btn')[1]);
   else setG('male',document.querySelectorAll('.g-btn')[0]);
-  // 편집 모드는 해제 (최근목록은 DB 편집과 별개)
-  if(typeof clearEdit==='function')clearEdit();
+  // 빠른입력 칸에도 반영
+  const gStr=isFemale?'여자':'남자';
+  const calStr=isLunar?'음력 ':'';
+  const nm0=e.name==='(이름없음)'?'':(e.name||'');
+  const hStr=(e.hourUnknown||e.hour==null)?'':' '+e.hour+'시';
+  var _qi=document.getElementById('quickInput');
+  if(_qi) _qi.value=`${nm0} ${gStr} ${calStr}${e.year} ${e.month} ${e.day}${hStr}`.trim();
+  // 인물 소개창(resTraits) 4차원 자국 박기
+  window._pendingTraits = {
+    yearTrait: e.job || '',
+    monthTrait: e.monthTrait || '',
+    dayTrait: e.dayTrait || '',
+    specialNote: e.keyword || ''
+  };
   calc(); // calc 내부에서 렌더 후 자동으로 scrollTo(0) 실행됨
 }
 function recentRemove(idx){
@@ -1897,8 +1918,9 @@ async function dbSave(){
   const R=lastResult;
   const all=await idbAll();
   const maxId=all.reduce((mx,e)=>Math.max(mx,e.id||0),0);
+  const newId=maxId+1;
   const entry={
-    id:maxId+1,
+    id:newId,
     name,year:R.origY,month:R.origM,day:R.origD,
     hour:R.h>=0?R.h:null,
     gender:R.gender==='male'?'M':'F',
@@ -1911,14 +1933,25 @@ async function dbSave(){
   };
   try{
     await idbPut(entry);
-    clearEdit();
+    // 신규 저장 후 수정 모드로 자동 전환 (clearEdit X — 입력값 그대로 살림)
+    editingId = newId;
+    document.getElementById('btnUpdate').style.display = '';
+    document.getElementById('editIndicator').style.display = '';
+    document.getElementById('editName').textContent = name;
     document.getElementById('dbSearch').value=name;
     await dbRender();
+    // 인물 소개창(resTraits) 자국도 새 데이터로 갈아끼움
+    window._pendingTraits = {
+      yearTrait: yearTrait || '',
+      monthTrait: monthTrait || '',
+      dayTrait: dayTrait || '',
+      specialNote: specialNote || ''
+    };
     // 검색엔진 초기화
     document.getElementById('seInput').value='';
     seResultCache=[];
     document.getElementById('seResults').innerHTML='<div class="se-status">이름을 입력하고 검색하세요</div>';
-    alert(`"${name}" 신규 저장 완료 (총 ${await idbCount()}명)`);
+    alert(`"${name}" 신규 저장 완료 (총 ${await idbCount()}명) — 이제부터 '수정 저장'으로 박을 수 있어`);
   }catch(e){
     console.error('DB 저장 오류:',e);
     alert('저장 실패: '+e.message);
@@ -1931,13 +1964,19 @@ async function dbUpdate(){
   if(!existing){alert('해당 인물을 찾을 수 없습니다.');clearEdit();return;}
   // 폼에서 값 가져오기
   const name=document.getElementById('pname').value||existing.name;
-  const job=document.getElementById('pjob').value||'';
-  const keyword=document.getElementById('pkeyword').value||'';
+  const yearTrait=document.getElementById('pjob').value||'';
+  const monthTrait=(document.getElementById('pmonthTrait')||{}).value||'';
+  const dayTrait=(document.getElementById('pdayTrait')||{}).value||'';
+  const specialNote=document.getElementById('pkeyword').value||'';
   const wiki=document.getElementById('pwiki').value||'';
-  // 기존 데이터에 폼 값 병합 (사주 확인 결과가 있으면 chart도 업데이트)
+  // 기존 데이터에 폼 값 병합 (4칸 + URL 모두 갱신)
   existing.name=name;
-  existing.job=job;
-  existing.keyword=keyword;
+  existing.yearTrait=yearTrait;
+  existing.monthTrait=monthTrait;
+  existing.dayTrait=dayTrait;
+  existing.specialNote=specialNote;
+  existing.job=yearTrait;      // 호환용 alias
+  existing.keyword=specialNote; // 호환용 alias
   existing.namuUrl=wiki;
   if(lastResult){
     const R=lastResult;
@@ -1951,8 +1990,16 @@ async function dbUpdate(){
   }
   try{
     await idbPut(existing);
-    clearEdit();
+    // 수정 모드 유지 (clearEdit X — 입력값·수정 버튼 그대로 살림)
+    document.getElementById('editName').textContent = name;
     await dbRender();
+    // 인물 소개창(resTraits) 자국도 새 데이터로 갈아끼움
+    window._pendingTraits = {
+      yearTrait: yearTrait || '',
+      monthTrait: monthTrait || '',
+      dayTrait: dayTrait || '',
+      specialNote: specialNote || ''
+    };
     alert(`"${name}" 수정 완료`);
   }catch(e){
     console.error('DB 수정 오류:',e);
