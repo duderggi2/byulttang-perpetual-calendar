@@ -682,8 +682,12 @@ function s2l(sy,sm,sd){const jd=getJDN(sy,sm,sd);for(let ly=sy-1;ly<=sy+1;ly++){
 
 // === Saju Calculation ===
 function dayP(y,m,d){const j=getJDN(y,m,d),si=((j%60)+49)%60;return{s:si%10,b:si%12,si};}
-// ★ KST→UT 변환 정밀 JD (h=-1이면 정오 기준 fallback)
-function birthJD_UT(y,m,d,h){return h>=0?getJDN(y,m,d)+(h-12)/24-9/24+0.5/24:getJDN(y,m,d)+.5;}
+// ★ KST→UT 변환 정밀 JD
+// 시간미상(h<0) 자세 정정 (2026-05-25): 기존 +.5는 UT 자정 = KST 다음날 09:00 자국 박혀
+// 절입 경계 시각이 KST 06:00~09:00 사이일 때 다음 절기로 박히는 버그.
+// 정정: 시간미상이면 KST 정오(12:00) 박음 — saju_engine_v3와 일관.
+// 검증: 베르나르 아르노 1949.3.5 시간미상 → 정묘(묘월) 오류 → 병인(인월) 정정.
+function birthJD_UT(y,m,d,h){return h>=0?getJDN(y,m,d)+(h-12)/24-9/24+0.5/24:getJDN(y,m,d)+12/24-9/24;}
 function yearP(y,m,d,h,ij){const c=birthJD_UT(y,m,d,h);let ey=y;if(c<ij)ey--;return{s:((ey-4)%10+10)%10,b:((ey-4)%12+12)%12};}
 
 function monthP(y,m,d,h,ys){
