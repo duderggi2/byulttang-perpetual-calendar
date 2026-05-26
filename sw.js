@@ -1,6 +1,6 @@
 // 별땅 만세력 Pro — Service Worker
 // 버전을 바꾸면 캐시가 갱신됨
-const CACHE_VERSION = 'byulddang-v1.9.1';  // 2026-05-25 — birthJD_UT 시간미상 자세 정정 (절입 경계 인월/묘월 버그)
+const CACHE_VERSION = 'byulddang-v1.9.2';  // 2026-05-26 — 시간미상 자세 술시(20시) 박음 (별땅 짚음)
 
 // 캐시할 파일 목록
 const CORE_ASSETS = [
