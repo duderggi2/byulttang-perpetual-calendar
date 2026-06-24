@@ -534,7 +534,7 @@ footer .fb{font-family:'Noto Serif KR',serif;color:var(--gold-d);font-size:11px}
 </div>
 
 <div class="db-box">
-<h3>人物 DB <span style="font-size:11px;color:var(--td);font-weight:300">(IndexedDB · <span id="dbCount">0</span>명)</span></h3>
+<h3>人物 DB <span style="font-size:11px;color:var(--td);font-weight:300">(공개 <span id="dbCountPublic">0</span> · 개인 <span id="dbCountPersonal" style="color:var(--wood)">0</span> · 총 <span id="dbCount">0</span>명)</span></h3>
 <div class="db-actions-v">
   <input class="db-input" id="dbSearch" placeholder="이름/키워드 검색" oninput="dbRender()">
 </div>
@@ -546,8 +546,15 @@ footer .fb{font-family:'Noto Serif KR',serif;color:var(--gold-d);font-size:11px}
   <input type="file" id="dbImportFile" accept=".json" style="display:none" onchange="dbImportJSON(event)">
   <button class="db-btn" onclick="document.getElementById('dbMergeFile').click()" style="color:var(--wood)">병합(JSON)</button>
   <input type="file" id="dbMergeFile" accept=".json" style="display:none" onchange="dbMergeJSON(event)">
-  <button class="db-btn" onclick="dbExportJSON()">내보내기</button>
+  <button class="db-btn" onclick="dbExportJSON('public')" title="개인 데이터 빼고 유명인만 — GitHub 배포용 (안전)">공개 내보내기</button>
+  <button class="db-btn" onclick="dbExportJSON('personal')" style="color:var(--wood)" title="내 개인 데이터만 — _개인인물DB 폴더에 저장">개인 내보내기</button>
+  <button class="db-btn" onclick="dbExportJSON('all')" title="공개+개인 전체">전체 내보내기</button>
   <button class="db-btn" onclick="dbClear()">전체 삭제</button>
+</div>
+<div style="font-size:10px;color:var(--td);margin-top:6px;line-height:1.6">
+  📁 개인 데이터 고정 자리: <code style="font-size:10px;color:var(--wood)">…\별땅역학연구소\_개인인물DB\개인_인물DB.json</code>
+  <button class="db-btn" style="padding:1px 6px;font-size:10px;margin-left:4px" onclick="navigator.clipboard.writeText('C:\\Users\\byult\\ai\\별땅역학연구소\\_개인인물DB').then(()=>alert('경로 복사됨'))">경로 복사</button>
+  <br>※ 개인 데이터는 이 기기에만 — 공개 배포(GitHub)엔 안 올라감. 다른 기기는 이 파일을 '불러오기'로 적재.
 </div>
 
 <div class="db-list" id="dbList"></div>
@@ -1946,8 +1953,12 @@ async function idbAddBulk(arr){
 }
 
 async function dbUpdateCount(){
-  const c=await idbCount();
-  document.getElementById('dbCount').textContent=c;
+  const all=await idbAll();
+  const personal=all.filter(isPersonal).length;
+  const pub=all.length-personal;
+  const elP=document.getElementById('dbCountPublic'); if(elP)elP.textContent=pub;
+  const elN=document.getElementById('dbCountPersonal'); if(elN)elN.textContent=personal;
+  const elC=document.getElementById('dbCount'); if(elC)elC.textContent=all.length;
 }
 
 async function dbSave(){
@@ -1974,7 +1985,8 @@ async function dbSave(){
     yearTrait, monthTrait, dayTrait, specialNote,
     job,keyword,namuUrl:wiki,
     chart:{ys:R.yP.s,yb:R.yP.b,mStem:R.mP.s,mBranch:R.mP.b,ds:R.dP.s,db:R.dP.b,
-      hs:R.hP?R.hP.s:null,hb:R.hP?R.hP.b:null}
+      hs:R.hP?R.hP.s:null,hb:R.hP?R.hP.b:null},
+    source:'personal'  // ★ 개인 데이터 표식 — 내 기기 전용·공개 배포 금지 (2026-06-24 어른의달력)
   };
   try{
     await idbPut(entry);
@@ -2178,22 +2190,32 @@ async function dbClear(){
   await idbClearAll();await dbRender();
 }
 
-// JSON Import/Export
-async function dbExportJSON(){
+// ★ 개인 데이터 판별 — source 없음·빈값·user·personal = 내 기기 전용(공개 배포 금지)
+function isPersonal(p){
+  return !p.source || p.source==='' || p.source==='user' || p.source==='personal';
+}
+
+// JSON Import/Export — mode: 'public'(개인 빼고·배포용) / 'personal'(개인만) / 'all'(전체)
+async function dbExportJSON(mode){
   const all=await idbAll();
-  const blob=new Blob([JSON.stringify({db:all},null,2)],{type:'application/json'});
-  // showSaveFilePicker 지원 시 → "다른 이름으로 저장" 대화상자
+  let list=all, label='전체', fname='인물DB_전체.json';
+  if(mode==='public'){
+    list=all.filter(p=>!isPersonal(p)); label='공개(배포용)'; fname='인물DB_공개_배포용.json';
+    if(list.some(isPersonal)){alert('⚠ 개인 데이터가 섞였습니다. 중단합니다.');return;}
+  }else if(mode==='personal'){
+    list=all.filter(isPersonal); label='개인(내 기기 전용)'; fname='개인_인물DB.json';
+  }
+  const blob=new Blob([JSON.stringify({db:list},null,2)],{type:'application/json'});
   if(window.showSaveFilePicker){
     try{
-      const handle=await showSaveFilePicker({suggestedName:'인물DB_import_with_charts.json',types:[{description:'JSON',accept:{'application/json':['.json']}}]});
+      const handle=await showSaveFilePicker({suggestedName:fname,types:[{description:'JSON',accept:{'application/json':['.json']}}]});
       const w=await handle.createWritable();
       await w.write(blob);await w.close();
-      alert(`저장 완료: ${handle.name} (${all.length}명)`);return;
-    }catch(e){if(e.name==='AbortError')return;} // 취소 시 무시
+      alert(`${label} 내보내기 완료: ${handle.name} (${list.length}명)`);return;
+    }catch(e){if(e.name==='AbortError')return;}
   }
-  // 미지원 브라우저 → 기존 다운로드 방식
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-  a.download='인물DB_import_with_charts.json';a.click();
+  a.download=fname;a.click();
 }
 async function dbImportJSON(event){
   const file=event.target.files[0];if(!file)return;
@@ -2933,23 +2955,32 @@ if('serviceWorker' in navigator){
 
 // ★ PWA: 인물DB 자동 로드 (3개 청크 파일에서 순차 불러오기)
 // 2026-05-14: 인물DB 버전 체크 + 자동 갱신 박힘
-const PWA_DB_VERSION='2026-05-14-44517-v7'; // 데이터 갱신 시 이 값 바꾸면 자동 재로드
+const PWA_DB_VERSION_FALLBACK='2026-06-24-44561'; // version.json 못 읽을 때만 폴백
 const PWA_DB_VERSION_KEY='byulddang_db_version';
 const DB_CHUNK_URLS=['./db_chunk_1.json','./db_chunk_2.json','./db_chunk_3.json'];
+// ★ version.json을 항상 새로 읽어 데이터 버전 감지 (데이터 갱신 시 version.json만 올리면 자동 반영)
+async function fetchDbVersion(){
+  try{
+    const r=await fetch('./version.json?_='+Date.now(),{cache:'no-store'});
+    if(r.ok){const j=await r.json(); if(j&&j.dbVersion) return j.dbVersion;}
+  }catch(e){console.warn('[PWA] version.json 못 읽음 → 폴백',e);}
+  return PWA_DB_VERSION_FALLBACK;
+}
 
 async function checkAndUpdateDB(){
   await idbOpen();
   const count=await idbCount();
+  const remoteVer=await fetchDbVersion();
   const storedVer=localStorage.getItem(PWA_DB_VERSION_KEY);
-  if(storedVer===PWA_DB_VERSION && count>0){
-    console.log('[PWA] DB 버전 일치:',PWA_DB_VERSION,'·',count,'명');
+  if(storedVer===remoteVer && count>0){
+    console.log('[PWA] DB 버전 일치:',remoteVer,'·',count,'명');
     return false;
   }
-  console.log('[PWA] 새 DB 박힘:',PWA_DB_VERSION,'(옛:',storedVer||'없음',')');
+  console.log('[PWA] 새 DB 박힘:',remoteVer,'(옛:',storedVer||'없음',')');
   
   // 사용자가 박은 자리 보존 (source 자국 X 자리)
   const all=await idbAll();
-  const toKeep=all.filter(p => !p.source || p.source==='user' || p.source==='');
+  const toKeep=all.filter(p => isPersonal(p));
   console.log('[PWA] 사용자 박은 자리 보존:',toKeep.length,'명');
   
   // IDB 전체 비우기
@@ -2964,7 +2995,7 @@ async function checkAndUpdateDB(){
   let totalLoaded=0;
   for(const chunkUrl of DB_CHUNK_URLS){
     try{
-      const resp=await fetch(chunkUrl);
+      const resp=await fetch(chunkUrl+'?v='+encodeURIComponent(remoteVer));
       if(!resp.ok){console.warn('[PWA] 청크 X:',chunkUrl);continue;}
       const chunk=await resp.json();
       for(const p of chunk){
@@ -2976,7 +3007,7 @@ async function checkAndUpdateDB(){
     }
   }
   
-  localStorage.setItem(PWA_DB_VERSION_KEY,PWA_DB_VERSION);
+  localStorage.setItem(PWA_DB_VERSION_KEY,remoteVer);
   console.log('[PWA] DB 자동 갱신 완료:',totalLoaded,'명 박힘');
   return true;
 }

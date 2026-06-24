@@ -63,6 +63,12 @@ self.addEventListener('fetch', event => {
     return;
   }
 
+  // ★ version.json은 절대 캐시 X — 항상 네트워크에서 최신 데이터 버전 확인 (자동 감지용)
+  if (url.pathname.endsWith('version.json')) {
+    event.respondWith(fetch(event.request, {cache:'no-store'}).catch(()=>caches.match(event.request)));
+    return;
+  }
+
   // index.html, .html, 루트 자리, compare.html — network-first
   // (옛 캐시 자리 박혀있어도 항상 네트워크에서 새 자리 받음)
   const isHTML = url.pathname.endsWith('.html') ||
