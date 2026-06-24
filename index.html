@@ -549,12 +549,6 @@ footer .fb{font-family:'Noto Serif KR',serif;color:var(--gold-d);font-size:11px}
   <button class="db-btn" onclick="dbExportJSON('public')" title="개인 데이터 빼고 유명인만 — GitHub 배포용 (안전)">공개 내보내기</button>
   <button class="db-btn" onclick="dbExportJSON('personal')" style="color:var(--wood)" title="내 개인 데이터만 — _개인인물DB 폴더에 저장">개인 내보내기</button>
   <button class="db-btn" onclick="dbExportJSON('all')" title="공개+개인 전체">전체 내보내기</button>
-  <button class="db-btn" onclick="dbClear()">전체 삭제</button>
-</div>
-<div style="font-size:10px;color:var(--td);margin-top:6px;line-height:1.6">
-  📁 개인 데이터 고정 자리: <code style="font-size:10px;color:var(--wood)">…\별땅역학연구소\_개인인물DB\개인_인물DB.json</code>
-  <button class="db-btn" style="padding:1px 6px;font-size:10px;margin-left:4px" onclick="navigator.clipboard.writeText('C:\\Users\\byult\\ai\\별땅역학연구소\\_개인인물DB').then(()=>alert('경로 복사됨'))">경로 복사</button>
-  <br>※ 개인 데이터는 이 기기에만 — 공개 배포(GitHub)엔 안 올라감. 다른 기기는 이 파일을 '불러오기'로 적재.
 </div>
 
 <div class="db-list" id="dbList"></div>
