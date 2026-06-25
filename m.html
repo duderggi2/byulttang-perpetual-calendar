@@ -1643,8 +1643,7 @@ function render(R){
     const stems=[JJ[br][2],JJ[br][1],JJ[br][0]].filter(s=>s!==null&&s!==undefined);
     const isMon=(i===2); // 월주
     t+='<td style="font-size:11px">';
-    t+=stems.map(s=>`<span class="${ecls(s)}">${Sh[s]}</span>`).join(',');
-    if(isMon){t+=`<br><span style="font-size:9px;color:var(--gold)">사령:${saryeongStr} · 절기 후 ${daysSinceJeolgi}일</span>`;}
+    t+=stems.map(s=>(isMon&&s===saryeongIdx)?`<span style="color:#d41717;font-weight:700">${Sh[s]}</span>`:`<span>${Sh[s]}</span>`).join(',');
     t+='</td>';
   }t+='</tr>';
   
