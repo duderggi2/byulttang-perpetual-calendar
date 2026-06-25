@@ -2084,6 +2084,13 @@ async function dbRender(){
   const qRaw=(document.getElementById('dbSearch')?.value||'').toLowerCase();
   const q=qRaw;
   const qNoSp=qRaw.replace(/\s/g,''); // 공백 제거 버전
+  if(!q){
+    dbFilteredCache=[];
+    const _el=document.getElementById('dbList');
+    if(_el)_el.innerHTML='<div style="color:var(--td);font-size:12px;text-align:center;padding:24px 8px;line-height:1.7">🔍 이름·키워드·사주로 검색하세요<br><span style="font-size:11px;opacity:.8">공개 '+all.length+'명 수록</span></div>';
+    const _pg=document.getElementById('dbPaging');if(_pg)_pg.innerHTML='';
+    return;
+  }
   let filtered=all;
   if(q){
     filtered=all.filter(e=>{

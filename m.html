@@ -373,13 +373,16 @@ footer .fb{font-family:'Noto Serif KR',serif;color:var(--gold-d);font-size:11px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .se-divider{font-size:10px;color:var(--td);padding:6px 12px;background:rgba(0,0,0,.02);border-radius:4px;margin:6px 0;letter-spacing:1px}
 
-/* === m.html 모바일 카드 레이아웃 (2026-06-25 어른의달력) === */
-body{overflow-x:hidden}
-.m-cards{display:flex;width:300vw;transition:transform .28s ease;will-change:transform}
-.m-card{width:100vw;flex:0 0 100vw;height:calc(100vh - 52px);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 10px 24px;box-sizing:border-box}
-.m-dots{position:fixed;bottom:0;left:0;right:0;height:52px;display:flex;align-items:stretch;background:var(--card);border-top:1px solid var(--bdr);z-index:200}
-.m-dot{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10px;color:var(--td);cursor:pointer;flex:1}
-.m-dot.active{color:var(--gold);background:rgba(201,168,76,.07)}
+/* === m.html 모바일 카드 (scroll-snap) 2026-06-25 어른의달력 === */
+header{display:none!important}
+.wrap{padding:0!important;max-width:none!important;margin:0!important}
+body{overflow:hidden}
+.m-cards{display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scroll-behavior:smooth;height:calc(100vh - 52px);width:100vw}
+.m-cards::-webkit-scrollbar{display:none}
+.m-card{flex:0 0 100vw;width:100vw;scroll-snap-align:start;scroll-snap-stop:always;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 12px 28px;box-sizing:border-box}
+.m-dots{position:fixed;bottom:0;left:0;right:0;height:52px;display:flex;background:var(--card);border-top:1px solid var(--bdr);z-index:200}
+.m-dot{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10px;color:var(--td);cursor:pointer}
+.m-dot.active{color:var(--gold);background:rgba(201,168,76,.08)}
 .m-dot .ic{font-size:17px;line-height:1}
 .m-card .main-left,.m-card .main-right,.m-card .main-far-right{flex:none!important;width:100%!important;min-width:0!important;position:static!important;max-height:none!important}
 .m-card .recent-panel,.m-card .db-box{max-height:none!important}
@@ -2099,6 +2102,13 @@ async function dbRender(){
   const qRaw=(document.getElementById('dbSearch')?.value||'').toLowerCase();
   const q=qRaw;
   const qNoSp=qRaw.replace(/\s/g,''); // 공백 제거 버전
+  if(!q){
+    dbFilteredCache=[];
+    const _el=document.getElementById('dbList');
+    if(_el)_el.innerHTML='<div style="color:var(--td);font-size:12px;text-align:center;padding:24px 8px;line-height:1.7">🔍 이름·키워드·사주로 검색하세요<br><span style="font-size:11px;opacity:.8">공개 '+all.length+'명 수록</span></div>';
+    const _pg=document.getElementById('dbPaging');if(_pg)_pg.innerHTML='';
+    return;
+  }
   let filtered=all;
   if(q){
     filtered=all.filter(e=>{
@@ -3100,37 +3110,28 @@ async function checkAndUpdateDB(){
 })();
 </script>
 <script>
-/* === m.html 모바일 카드화 + 스와이프 (데스크탑 DOM 재배치, 계산 로직은 그대로 재사용) === */
+/* === m.html 카드화 (scroll-snap, 헤더 제거, 데스크탑 DOM 재사용) === */
 (function mobileCards(){
-  if(window.innerWidth>700) return;
   const split=document.querySelector('.main-split'); if(!split) return;
-  const ml=split.querySelector('.main-left');
-  const mr=split.querySelector('.main-right');
-  const mfr=split.querySelector('.main-far-right');
+  const ml=split.querySelector('.main-left'), mr=split.querySelector('.main-right'), mfr=split.querySelector('.main-far-right');
   const dbBox=mr?mr.querySelector('.db-box'):null;
   const cards=document.createElement('div'); cards.className='m-cards';
   const mk=()=>{const d=document.createElement('div');d.className='m-card';return d;};
   const c1=mk(),c2=mk(),c3=mk();
-  if(mr){ while(mr.firstChild && mr.firstChild!==dbBox){ c1.appendChild(mr.firstChild); } }
-  if(ml) c2.appendChild(ml);
-  if(dbBox) c3.appendChild(dbBox);
-  if(mfr) c3.appendChild(mfr);
-  cards.appendChild(c1); cards.appendChild(c2); cards.appendChild(c3);
-  split.parentNode.insertBefore(cards, split); split.remove();
-  // 하단 점/탭
+  if(mr){while(mr.firstChild&&mr.firstChild!==dbBox)c1.appendChild(mr.firstChild);}
+  if(ml)c2.appendChild(ml);
+  if(dbBox)c3.appendChild(dbBox);
+  if(mfr)c3.appendChild(mfr);
+  cards.appendChild(c1);cards.appendChild(c2);cards.appendChild(c3);
+  split.parentNode.insertBefore(cards,split); split.remove();
   const labels=[['📝','입력'],['☯','사주'],['👥','인물DB']];
   const dots=document.createElement('div'); dots.className='m-dots';
-  let cur=0;
-  const goTo=(i)=>{cur=Math.max(0,Math.min(2,i));cards.style.transform='translateX(-'+(cur*100)+'vw)';[...dots.children].forEach((d,k)=>d.classList.toggle('active',k===cur));const ac=cards.children[cur];if(ac)ac.scrollTop=0;};
+  const goTo=(i)=>{i=Math.max(0,Math.min(2,i));cards.scrollTo({left:i*window.innerWidth,behavior:'smooth'});};
   labels.forEach((l,i)=>{const d=document.createElement('div');d.className='m-dot'+(i===0?' active':'');d.innerHTML='<span class="ic">'+l[0]+'</span>'+l[1];d.onclick=()=>goTo(i);dots.appendChild(d);});
   document.body.appendChild(dots);
-  // 좌우 스와이프 (세로 스크롤과 구분)
-  let x0=null,y0=null;
-  const host=cards.parentNode;
-  host.addEventListener('touchstart',e=>{x0=e.touches[0].clientX;y0=e.touches[0].clientY;},{passive:true});
-  host.addEventListener('touchend',e=>{if(x0===null)return;const dx=e.changedTouches[0].clientX-x0,dy=e.changedTouches[0].clientY-y0;if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.5)goTo(cur+(dx<0?1:-1));x0=null;},{passive:true});
-  // 사주 확인하면 자동으로 사주 카드로
-  if(typeof window.calc==='function'){ const _c=window.calc; window.calc=function(){const r=_c.apply(this,arguments);setTimeout(()=>goTo(1),350);return r;}; }
+  let to=null;
+  cards.addEventListener('scroll',()=>{clearTimeout(to);to=setTimeout(()=>{const i=Math.round(cards.scrollLeft/window.innerWidth);[...dots.children].forEach((d,k)=>d.classList.toggle('active',k===i));},90);},{passive:true});
+  if(typeof window.calc==='function'){const _c=window.calc;window.calc=function(){const r=_c.apply(this,arguments);setTimeout(()=>goTo(1),350);return r;};}
   window.mGoTo=goTo;
 })();
 </script>
