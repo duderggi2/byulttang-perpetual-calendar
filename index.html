@@ -444,6 +444,14 @@ footer .fb{font-family:'Noto Serif KR',serif;color:var(--gold-d);font-size:11px}
     <button class="db-btn primary" onclick="dbSearchAdvanced()">검색</button>
     <button class="db-btn" onclick="advSearchReset()">초기화</button>
   </div>
+  <div class="rs-box" style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(0,0,0,0.12)">
+    <div style="font-size:12px;color:var(--gold);margin-bottom:6px">📅 명조로 생일 찾기 (역산)</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+      <input id="rsInput" placeholder="예: 정미 계묘 갑술 (시는 선택)" style="flex:1;min-width:200px;padding:6px 10px;border:1px solid rgba(0,0,0,0.2);border-radius:6px;font-size:13px" onkeydown="if(event.key==='Enter')rsSearch()">
+      <button class="db-btn primary" onclick="rsSearch()">날짜 찾기</button>
+    </div>
+    <div id="rsResults" style="margin-top:8px;font-size:12px"></div>
+  </div>
 </div>
 </div>
 
@@ -2280,6 +2288,64 @@ async function dbMergeJSON(event){
     alert(`병합 완료!\n· 신규 추가: ${newItems.length}명\n· 중복 건너뜀: ${dupes.length}명\n· 현재 총: ${existing.length+newItems.length}명`);
   }catch(e){alert('파일 오류: '+e.message);}
   event.target.value='';
+}
+
+// === 역산 (명조 → 날짜) — 2026-06-25 어른의달력 ===
+const RS_STEM_H='갑을병정무기경신임계', RS_STEM_C='甲乙丙丁戊己庚辛壬癸';
+const RS_BR_H='자축인묘진사오미신유술해', RS_BR_C='子丑寅卯辰巳午未申酉戌亥';
+function rsStemIdx(c){let i=RS_STEM_H.indexOf(c);return i>=0?i:RS_STEM_C.indexOf(c);}
+function rsBrIdx(c){let i=RS_BR_H.indexOf(c);return i>=0?i:RS_BR_C.indexOf(c);}
+function rsParseGZ(str){str=(str||'').trim();if(str.length<2)return null;const a=rsStemIdx(str[0]),b=rsBrIdx(str[1]);if(a<0||b<0)return null;return{s:a,b:b};}
+function rsSiFromSB(a,b){for(let si=0;si<60;si++)if(si%10===a&&si%12===b)return si;return -1;}
+function rsBrToHour(b){return [0,2,4,6,8,10,12,14,16,18,20,22][b];}
+function rsParseMyungjo(text){
+  text=(text||'').replace(/[년월일시\s,·]/g,'');
+  const parts=[];for(let i=0;i+1<text.length;i+=2)parts.push(text.slice(i,i+2));
+  if(parts.length<3)return null;
+  const y=rsParseGZ(parts[0]),m=rsParseGZ(parts[1]),d=rsParseGZ(parts[2]);
+  const h=parts.length>=4?rsParseGZ(parts[3]):null;
+  if(!y||!m||!d)return null;
+  return{y,m,d,h};
+}
+function reverseSaju(yGZ,mGZ,dGZ){
+  const dSI=rsSiFromSB(dGZ.s,dGZ.b);
+  const jMod=(((dSI-49)%60)+60)%60;
+  const jStart=getJDN(1000,1,1),jEnd=getJDN(2050,12,31);
+  let j=jStart+(((jMod-(jStart%60))%60)+60)%60;
+  const out=[];
+  for(;j<=jEnd;j+=60){
+    const dt=jdn2d(j),y=dt.y,m=dt.m,d=dt.d;
+    const ij=findST(y-1,315);
+    const yp=yearP(y,m,d,12,ij);
+    if(yp.s!==yGZ.s||yp.b!==yGZ.b)continue;
+    const mp=monthP(y,m,d,12,yp.s);
+    if(mp.s!==mGZ.s||mp.b!==mGZ.b)continue;
+    out.push({y,m,d});
+  }
+  return out;
+}
+function rsSearch(){
+  const box=document.getElementById('rsResults');
+  const mj=rsParseMyungjo(document.getElementById('rsInput').value);
+  if(!mj){box.innerHTML='<div style="color:#c66">명조를 못 읽었어. 예: 정미 계묘 갑술 (또는 丁未癸卯甲戌)</div>';return;}
+  box.innerHTML='<div style="color:var(--ts)">찾는 중…</div>';
+  setTimeout(()=>{
+    const cands=reverseSaju(mj.y,mj.m,mj.d);
+    if(!cands.length){box.innerHTML='<div style="color:#c66">1000~2050에서 그 간지의 날짜를 못 찾았어. 간지 조합을 확인해줘.</div>';return;}
+    const h=mj.h?rsBrToHour(mj.h.b):-1;
+    const hLabel=mj.h?(' · '+RS_BR_H[mj.h.b]+'시'):'';
+    box.innerHTML='<div style="margin-bottom:4px;color:var(--ts)">후보 '+cands.length+'개 — 연대를 알면 골라줘 (클릭하면 입력장에 들어감)</div>'+
+      cands.map(c=>'<button class="db-btn" style="margin:2px 0;display:block;width:100%;text-align:left" onclick="rsFill('+c.y+','+c.m+','+c.d+','+h+')">'+c.y+'년 '+c.m+'월 '+c.d+'일 (양력)'+hLabel+'</button>').join('');
+  },10);
+}
+function rsFill(y,m,d,h){
+  const solarBtn=document.querySelector('.cal-tog button');
+  if(solarBtn)setCal('solar',solarBtn);else calType='solar';
+  document.getElementById('year').value=y;
+  document.getElementById('month').value=String(m);
+  document.getElementById('day').value=d;
+  document.getElementById('hour').value=String(h);
+  document.getElementById('year').scrollIntoView({behavior:'smooth',block:'center'});
 }
 
 // === 고급 검색 (4열 고정 레이아웃) ===
