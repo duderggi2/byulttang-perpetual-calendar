@@ -3065,6 +3065,7 @@ async function checkAndUpdateDB(){
       if(!resp.ok){console.warn('[PWA] 청크 X:',chunkUrl);continue;}
       const chunk=await resp.json();
       for(const p of chunk){
+        if(!p.source) p.source='public'; // ★ 청크(공개 배포) 출신은 공개로 보장 (source 누락 방어 · 2026-06-26)
         try{await idbPut(p);totalLoaded++;}catch(e){}
       }
       console.log('[PWA] 청크 박힘:',chunkUrl,'→',chunk.length,'명');
