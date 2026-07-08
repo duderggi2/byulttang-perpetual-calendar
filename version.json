@@ -1,5 +1,5 @@
 {
-  "dbVersion": "2026-06-26-51508-v2",
-  "chunkCount": 3,
-  "_안내": "데이터 갱신 시 이 dbVersion 값만 바꿔서 db_chunk와 함께 GitHub에 올리면 됨. 형식 자유(예: 날짜-인원수). 앱이 켜질 때 이 파일을 항상 새로 읽어 버전이 바뀌었으면 청크를 다시 받아 갱신함. sw.js·index.html은 안 건드려도 되고 F12도 필요 없음."
+  "dbVersion": "2026-07-08-55061-sulsi",
+  "chunkCount": 4,
+  "_안내": "데이터 갱신 시 이 dbVersion 값만 바꿔서 db_chunk와 함께 GitHub에 올리면 됨. 청크 개수가 바뀌면 chunkCount도 맞춰 바꾸면 app이 자동으로 그 개수만큼 받음(index.html·sw.js 안 건드려도 됨). 앱이 켜질 때 이 파일을 항상 새로 읽어 버전이 바뀌었으면 청크를 다시 받아 갱신함."
 }

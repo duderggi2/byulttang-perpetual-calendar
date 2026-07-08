@@ -3023,12 +3023,15 @@ if('serviceWorker' in navigator){
 // 2026-05-14: 인물DB 버전 체크 + 자동 갱신 박힘
 const PWA_DB_VERSION_FALLBACK='2026-06-24-44561'; // version.json 못 읽을 때만 폴백
 const PWA_DB_VERSION_KEY='byulddang_db_version';
-const DB_CHUNK_URLS=['./db_chunk_1.json','./db_chunk_2.json','./db_chunk_3.json'];
-// ★ version.json을 항상 새로 읽어 데이터 버전 감지 (데이터 갱신 시 version.json만 올리면 자동 반영)
+let DB_CHUNK_URLS=['./db_chunk_1.json','./db_chunk_2.json','./db_chunk_3.json']; // 폴백 (version.json chunkCount로 자동 갱신)
+// ★ version.json을 항상 새로 읽어 데이터 버전 + 청크 개수 감지 (데이터 갱신 시 version.json만 올리면 자동 반영 · 청크 개수 바뀌어도 코드 수정 불필요)
 async function fetchDbVersion(){
   try{
     const r=await fetch('./version.json?_='+Date.now(),{cache:'no-store'});
-    if(r.ok){const j=await r.json(); if(j&&j.dbVersion) return j.dbVersion;}
+    if(r.ok){const j=await r.json();
+      if(j&&j.chunkCount>0){DB_CHUNK_URLS=[];for(let i=1;i<=j.chunkCount;i++)DB_CHUNK_URLS.push('./db_chunk_'+i+'.json');}
+      if(j&&j.dbVersion) return j.dbVersion;
+    }
   }catch(e){console.warn('[PWA] version.json 못 읽음 → 폴백',e);}
   return PWA_DB_VERSION_FALLBACK;
 }

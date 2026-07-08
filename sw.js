@@ -11,11 +11,12 @@ const CORE_ASSETS = [
 ];
 
 // 인물DB는 별도 캐시 (크기가 크므로 분리)
-const DB_CACHE = 'byulddang-db-v5-44517';
+const DB_CACHE = 'byulddang-db-v6-55061';
 const DB_CHUNKS = [
   './db_chunk_1.json',
   './db_chunk_2.json',
-  './db_chunk_3.json'
+  './db_chunk_3.json',
+  './db_chunk_4.json'
 ];
 
 // 설치: 핵심 파일 캐싱
