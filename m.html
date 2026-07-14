@@ -1681,7 +1681,7 @@ function render(R){
   for(let i=0;i<4;i++){
     if(!ps[i].d){t+='<td>—</td>';continue;}
     const tags=pillarSinsal(dP.s,dP.b,dP.si,ps[i].d.b,i,yP.b,yP.s);
-    t+='<td class="sinsal-cell">'+tags.map(x=>'<span>'+x+'</span>').join('')+'</td>';
+    t+='<td class="sinsal-cell">'+tags.map(x=>x==='공망(일)'?'<span style="color:#d41717;font-weight:700">'+x+'</span>':'<span>'+x+'</span>').join('')+'</td>';
   }t+='</tr>';
   
   // 괘사 (기둥별 간지 → 괘명 · 규칙사전 v1.5)
