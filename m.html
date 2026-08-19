@@ -406,7 +406,7 @@ body{overflow:hidden}
 
 <div id="result">
 <div id="convNote" class="conv-note" style="display:none"></div>
-<div class="res-head"><div class="tit" id="resTit"></div><div class="dt" id="resDt"></div><div class="dt-sub" id="resDtSub"></div></div>
+<div class="res-head" style="position:relative"><div class="tit" id="resTit"></div><div class="dt" id="resDt"></div><div class="dt-sub" id="resDtSub"></div><span id="copyChartBtn" onclick="copyChart()" title="원국 텍스트 복사" style="position:absolute;top:6px;right:8px;font-size:16px;line-height:1;cursor:pointer;user-select:none;padding:7px 9px;border:1px solid var(--bdr);border-radius:6px;background:var(--card);opacity:.75">📋</span></div><textarea id="chartOut" readonly aria-hidden="true" tabindex="-1" style="position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0"></textarea>
 <div id="resTraits" style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:10px 16px;margin-bottom:14px;display:none;font-size:11.5px;line-height:1.55">
   <div id="trYear" style="color:var(--ts);margin-bottom:3px"></div>
   <div id="trMonth" style="color:var(--ts);margin-bottom:3px"></div>
@@ -620,6 +620,11 @@ body{overflow:hidden}
 // === Constants ===
 const SH='甲乙丙丁戊己庚辛壬癸'.split(''),Sh='갑을병정무기경신임계'.split('');
 const HEX60=['뇌수해','풍수환','천뢰무망','화풍정','중천건','화천대유','산화비','택화혁','지산겸','수택절','뇌지예','풍지관','천수송','화수미제','지뢰복','수풍정','산천대축','택천쾌','지화명이','수화기제','뇌산소과','풍택중부','천지비','화지진','지수사','중수감','산뢰이','택풍대과','지천태','수천수','뇌화풍','풍화가인','천산둔','화택규','중지곤','수지비','산수몽','택수곤','지뢰복','수풍정','뇌천대장','풍천소축','천화동인','중화리','천산둔','화택규','산지박','택지췌','지수사','중수감','중뢰진','중풍손','중천건','화천대유','천화동인','중화리','중산간','중택태','중지곤','수지비'];
+/* ★ 괘 옆에 붙는 「순환월의 소속」 — 예: 수풍정(戌의 意)  (별땅 2026-08-15)
+   *"괘사 옆에 몇월의 基命號化意主 라는 문구가 붙었으면 좋겠어. 이건 암산으로 할 수가 없거든"*
+   정본: adult_calendar_processor/_data/_공용/간지64괘_해설_어른의달력용_v2.json (점돌이1 v2)
+   ↳ 그 파일의 「순환월」+「소속」을 60갑자 순서로 편 것. 괘명 60칸을 HEX60과 전수 대조해 어긋남 0 확인. */
+const GWAE_SUB60=['未의 意','辰의 號','卯의 號','丑의 號','巳의 命','巳의 化','午의 意','酉의 基','辰의 基','午의 基','午의 號','酉의 命','未의 化','寅의 意','子의 命','戌의 意','未의 基','辰의 命','丑의 化','申의 意','子의 主','午의 主','申의 命','酉의 化','子의 化','巳의 意','戌의 化','辰의 化','寅의 命','卯의 化','戌의 號','丑의 意','未의 命','酉의 意','亥의 命','亥의 化','卯의 基','子의 意','子의 命','戌의 意','卯의 命','子의 號','午의 化','亥의 意','未의 命','酉의 意','戌의 命','丑의 基','子의 化','巳의 意','巳의 基','亥의 基','巳의 命','巳의 化','午의 化','亥의 意','巳의 號','亥의 號','亥의 命','亥의 化'];
 const BH='子丑寅卯辰巳午未申酉戌亥'.split(''),Bh='자축인묘진사오미신유술해'.split('');
 const BA=['쥐','소','호랑이','토끼','용','뱀','말','양','원숭이','닭','개','돼지'];
 const SE=[0,0,1,1,2,2,3,3,4,4],BE=[4,2,0,0,2,1,1,2,3,3,2,4];
@@ -1688,7 +1693,8 @@ function render(R){
   t+='<tr><td class="lbl">괘사</td>';
   for(let i=0;i<4;i++){
     if(!ps[i].d){t+='<td>—</td>';continue;}
-    t+=`<td class="ss" style="font-size:11px">${HEX60[getSI(ps[i].d.s,ps[i].d.b)]}</td>`;
+    {const _si=getSI(ps[i].d.s,ps[i].d.b), _sb=GWAE_SUB60[_si]||'';
+     t+=`<td class="ss" style="font-size:11px;line-height:1.35">${HEX60[_si]}${_sb?`<br><span style="font-size:9.5px;color:var(--td);font-weight:400">(${_sb})</span>`:''}</td>`;}
   }t+='</tr>';
   document.getElementById('sajuTbl').innerHTML=t;
   
@@ -3144,6 +3150,70 @@ async function checkAndUpdateDB(){
   if(typeof window.calc==='function'){const _c=window.calc;window.calc=function(){const r=_c.apply(this,arguments);setTimeout(()=>goTo(1),350);return r;};}
   window.mGoTo=goTo;
 })();
+/* ══════════════════════════════════════════════════════════════
+   原局 텍스트 만들기 — 화면에 그려진 것을 그대로 읽어 옮긴다.
+   ★ 계산 로직은 건드리지 않는다. 버튼을 누른 그 순간의 화면을 읽는다.
+   ★ 순서는 별땅 이론대로 年 → 月 → 日 → 時 (표는 時日月年 순이라 뒤집는다).
+   어른의달력1 · 2026-08-15
+   ══════════════════════════════════════════════════════════════ */
+function _txt(sel){ const e=document.querySelector(sel); return e? e.textContent.replace(/\s+/g,' ').trim() : ''; }
+function buildChartText(){
+  const L=[];
+  const tit=_txt('#resTit'), dt=_txt('#resDt'), sub=_txt('#resDtSub'), conv=_txt('#convNote');
+  L.push('[사주 원국]');
+  if(tit) L.push(tit);
+  if(dt||sub) L.push([dt,sub].filter(Boolean).join(' · '));
+  if(conv) L.push('※ '+conv);
+
+  // 표를 행별로 걷는다 (같은 라벨이 여러 번 → 배열)
+  const R={};
+  document.querySelectorAll('#sajuTbl tr').forEach(tr=>{
+    const lbl=tr.querySelector('.lbl'); if(!lbl) return;
+    const key=lbl.textContent.replace(/\s+/g,'').trim();
+    const cells=[...tr.querySelectorAll('td')].slice(1).map(td=>td.textContent.replace(/\s+/g,' ').trim()||'—');
+    (R[key]=R[key]||[]).push(cells);
+  });
+  const g=(k,n,i)=>((R[k]&&R[k][n])?R[k][n][i]:'') || '—';
+
+  // 표는 [시,일,월,연] → 년·월·일·시 순으로 뒤집는다
+  L.push('');
+  for(const c of [{i:3,nm:'연주'},{i:2,nm:'월주'},{i:1,nm:'일주'},{i:0,nm:'시주'}]){
+    const gan=g('천간',0,c.i), ji=g('지지',0,c.i);
+    if(/[？?]/.test(gan+ji) || (gan==='—'&&ji==='—')){ L.push(c.nm+' (모름)'); continue; }
+    const p=[];
+    p.push('십신 '+g('십신',0,c.i)+'·'+g('십신',1,c.i));
+    const y1=g('년기준',0,c.i), y2=g('년기준',1,c.i);
+    if(!/^(년간|년지)$/.test(y1) && (y1!=='—'||y2!=='—')) p.push('년기준 '+y1+'·'+y2);
+    p.push('장간 '+g('장간',0,c.i));
+    p.push('운성 '+g('운성',0,c.i));
+    p.push('지향 '+g('지향',0,c.i).replace('지향',''));
+    p.push('신살 '+g('신살',0,c.i));
+    p.push('괘 '+g('괘사',0,c.i));
+    L.push(c.nm+' '+gan+ji+' | '+p.join(' | '));
+  }
+  return L.join('\n');
+}
+function copyChart(){
+  const box=document.getElementById('chartOut');
+  const b=document.getElementById('copyChartBtn');
+  let s='';
+  try{ s=buildChartText(); }
+  catch(e){ alert('원국 텍스트를 만들지 못했습니다: '+e.message); return; }
+  if(!s || !/[가-힣]주 [一-鿿]/.test(s)){ alert('먼저 「사주 확인하기」를 눌러 주세요'); return; }
+  box.value=s; box.select(); box.setSelectionRange(0,s.length);
+  let ok=false;
+  try{ ok=document.execCommand('copy'); }catch(e){}
+  if(!ok && navigator.clipboard){ navigator.clipboard.writeText(s).then(()=>{},()=>{}); ok=true; }
+  if(window.getSelection) window.getSelection().removeAllRanges();
+  box.blur();
+  if(b){
+    if(b._t) clearTimeout(b._t);
+    b.textContent = ok ? '복사되었습니다' : '복사 실패';
+    b.style.fontSize='11px'; b.style.opacity='1';
+    b.style.color = ok ? 'var(--gold)' : '#c33';
+    b._t=setTimeout(()=>{ b.textContent='📋'; b.style.fontSize='15px'; b.style.opacity='.75'; b.style.color=''; },1600);
+  }
+}
 </script>
 </body>
 </html>
